@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="ca_connector_view_tree" model="ir.ui.view">
+        <field name="name">ca.connector.tree</field>
+        <field name="model">ca.connector</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name" />
+                <field name="state" />
+            </tree>
+        </field>
+    </record>
+
+
+    <record id="ca_connector_view_from" model="ir.ui.view">
+        <field name="name">ca.connector.form</field>
+        <field name="model">ca.connector</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_confirm" type="object" string="Confirm" class="oe_highlight"
+                        attrs="{'invisible': [('state', '=', 'active')]}" />
+                    <button name="action_refresh_access_token" type="object" string="Refresh Token"
+                        attrs="{'invisible': [('state', '=', 'draft')]}" />
+                    <button name="action_reset" type="object" string="Reset"
+                        attrs="{'invisible': [('state', '=', 'draft')]}" />
+                    <button name="action_import_products" type="object" string="Import Products"
+                        attrs="{'invisible': [('state', '=', 'draft')]}" />
+                    <button name="action_import_orders" type="object" string="Import Orders"
+                        attrs="{'invisible': [('state', '=', 'draft')]}" />
+                    <field name="state" widget="statusbar" statusbar_visible="active" />
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h2>
+                            <field name="name" default_focus="1" placeholder="Name" required="1"
+                                attrs="{'readonly': [('state', '!=', 'draft')]}" />
+                        </h2>
+                        <div class="o_row">
+                            <field name="description" placeholder="Description"
+                                attrs="{'readonly': [('state', '!=', 'draft')]}" />
+                        </div>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="application_id" required="1"
+                                attrs="{'readonly': [('state', '!=', 'draft')]}" />
+                            <field name="shared_secret" required="1" attrs="{'readonly': [('state', '!=', 'draft')]}" />
+                            <field name="client_id" invisible="1" />
+                        </group>
+                        <group>
+                            <field name="refresh_token" required="1" attrs="{'readonly': [('state', '!=', 'draft')]}" />
+                            <field name="access_token" readonly="1" force_save="1" />
+                            <field name="expiry_date" invisible="1" readonly="1" force_save="1" />
+                        </group>
+                    </group>
+                    <group>
+                        <group>
+                            <field name="auto_import_orders" />
+                            <field name="orders_imported_date" string="Last Imported On" />
+                        </group>
+                        <group>
+                            <field name="auto_import_products" />
+                            <field name="products_imported_date" string="Last Imported On" />
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Accounts">
+                            <field name="ca_account_ids" nolabel="1" widget="many2many" readonly="1" force_save="1" />
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+
+    <record id="ca_connector_action" model="ir.actions.act_window">
+        <field name="name">Connector</field>
+        <field name="res_model">ca.connector</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="ca_connector_view_tree" />
+    </record>
+
+
+    <menuitem id="ca_connector_menu" action="ca_connector_action" parent="menu_chnl_adv" sequence="5" />
+
+</odoo>

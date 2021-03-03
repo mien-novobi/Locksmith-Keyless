@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record model="ir.ui.view" id="res_company_inherit_pdts">
+        <field name="name">res.company.inherit.pdt</field>
+        <field name="model">res.company</field>
+        <field name="inherit_id" ref="base.view_company_form"/>
+        <field name="arch" type="xml">
+            <notebook position="inside">
+                <page string="CA Default Product">
+                    <group>
+                        <field name="shipping_cost_product_id" domain="[('type', '=', 'service')]"/>
+                        <field name="tax_product_id" domain="[('type', '=', 'service')]"/>
+                        <field name="gift_product_id" domain="[('type', '=', 'service')]"/>
+                        <field name="addt_cost_product_id" domain="[('type', '=', 'service')]"/>
+                        <field name="insurance_product_id" domain="[('type', '=', 'service')]"/>
+                        <field name="promotion_product_id" domain="[('type', '=', 'service')]"/>
+                    </group>
+                </page>
+            </notebook>
+        </field>
+    </record>
+
+</odoo>

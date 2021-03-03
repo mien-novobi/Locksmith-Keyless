@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="chanl_adv_logger_tree_view" model="ir.ui.view">
+        <field name="name">chnl_adv.logger.tree</field>
+        <field name="model">transaction.log</field>
+        <field name="arch" type="xml">
+            <tree create="false" edit="false" delete="false">
+                <field name="name" /><!--<field name="ftp_id" />-->
+            </tree>
+
+        </field>
+    </record>
+
+    <record id="chanl_adv_logger_form_view" model="ir.ui.view">
+        <field name="name">chnl_adv.logger.form</field>
+        <field name="model">transaction.log</field>
+        <field name="mode">primary</field>
+        <field name="arch" type="xml">
+            <form create="false" edit="false" delete="false">
+                <sheet>
+                    <group>
+                        <field name="name" />
+                        <!--<field name="ftp_id" />-->
+                        <field name="message" />
+                        <field name="sale_id" />
+                        <!--<field name="attachment_id" />-->
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="chanl_adv_logger_action" model="ir.actions.act_window">
+        <field name="name">Logs</field>
+        <field name="res_model">transaction.log</field>
+        <field name="view_mode">tree,form</field>
+        <!--<field name="view_type">form</field>-->
+        <field name="help" type="html">
+            <p>
+                Here you will find all error logs
+            </p>
+
+        </field>
+    </record>
+
+    <menuitem id="menu_chanl_adv_log" name="Log" sequence="100" parent="base.menu_custom" />
+    <menuitem name="Transaction Log" id="menu_chanl_adv_logger"  parent="menu_chnl_adv" action="chanl_adv_logger_action" sequence="500" />
+
+</odoo>

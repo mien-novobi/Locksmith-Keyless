@@ -1,0 +1,8 @@
+"id","name","model_id:id","group_id:id","perm_read","perm_write","perm_create","perm_unlink"
+"access_channel_advisor_edi_config","edi.config","model_edi_config","base.group_user",1,1,1,1
+"access_channel_advisor_transaction_log","transaction.log","model_transaction_log","base.group_user",1,1,1,1
+"access_channel_advisor_customer_product_values","customer.product.values","model_customer_product_values","base.group_user",1,1,1,1
+ca_connector_access_manager,ca.connector.manager,model_ca_connector,base.group_erp_manager,1,1,1,1
+ca_account_access_manager,ca.account.manager,model_ca_account,base.group_erp_manager,1,1,1,1
+ca_distribution_center_access_manager,ca.distribution.center.manager,model_ca_distribution_center,base.group_erp_manager,1,1,1,1
+ca_product_bundle_access_user,ca.product.bundle.user,model_ca_product_bundle,base.group_user,1,1,1,1

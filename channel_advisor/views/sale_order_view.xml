@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <data>
+
+
+
+        <record model="ir.ui.view" id="channel_adv_sale_order">
+            <field name="name">channel_adv.sale.order</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name ='date_order']" position="after">
+                    <field name="chnl_adv_order_id" />
+                    <!--<field name="item_sale_source" />-->
+                    <field name="is_edi_order" invisible="1"/>
+                    <field name="is_fba" invisible="1"/>
+                    <field name="is_review" invisible="1"/>
+                </xpath>
+                <xpath expr="//field[@name='order_line']/tree/field[@name='price_subtotal']" position="after">
+                    <field name="margin_percent" string="Margin%"/>
+                    <field name="promotion_code" invisible ="1"/>
+                </xpath>
+                <!--<xpath expr="//field[@name='amount_total']" position="after">-->
+                    <!--<field name="margin_percent" string="Margin%"/>-->
+                <!--</xpath>-->
+                <xpath expr="//field[@name='client_order_ref']" position="after">
+                    <field name="special_instruction" />
+                    <field name="private_note" />
+                    <field name="total_price" />
+                </xpath>
+
+            </field>
+        </record>
+        <record model="ir.ui.view" id="sale_margin_sale_order_inherit">
+        <field name="name">sale.order.margin.view.form</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale_margin.sale_margin_sale_order"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='margin']" position="replace">
+                    <field name="margin_percent" string="Margin%" groups="base.group_user"/>
+            </xpath>
+        </field>
+    </record>
+
+
+
+
+        <record model="ir.ui.view" id="channel_adv_sale_order_order_line">
+            <field name="name">sale.order.line.margin.view.form</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='order_line']/form//field[@name='price_unit']" position="after">
+                    <field name="margin_percent" string="Margin%" groups="base.group_user"/>
+                     <field name="promotion_code" groups="base.group_user"/>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="action_sale_order_ca_order" model="ir.actions.act_window">
+            <field name="name">CA Orders</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">sale.order</field>
+            <field name="view_mode">tree,kanban,form,calendar,pivot,graph</field>
+            <field name="search_view_id" ref="sale.sale_order_view_search_inherit_sale"/>
+            <field name="context">{'create':False, 'default_is_edi_order':True, 'create': False}</field>
+            <field name="domain">[('is_edi_order', '=', True)]</field>
+        </record>
+         <menuitem id="menu_sale_order_ca_order"
+          name="CA Orders" action="action_sale_order_ca_order"
+          parent="sale.sale_order_menu"
+          sequence="2" />
+         <record id="action_sale_order_fba_order" model="ir.actions.act_window">
+            <field name="name">FBA Orders</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">sale.order</field>
+            <field name="view_mode">tree,kanban,form,calendar,pivot,graph</field>
+            <field name="search_view_id" ref="sale.sale_order_view_search_inherit_sale"/>
+            <field name="context">{'create':False, 'default_is_fba':True, 'create': False}</field>
+            <field name="domain">[('is_fba', '=', True)]</field>
+        </record>
+         <menuitem id="menu_sale_order_fba_order"
+          name="FBA Orders" action="action_sale_order_fba_order"
+          parent="sale.sale_order_menu"
+          sequence="2" />
+
+        <record id="action_sale_order_ca_order_review" model="ir.actions.act_window">
+            <field name="name">Review CA Orders</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">sale.order</field>
+            <field name="view_mode">tree,kanban,form,calendar,pivot,graph</field>
+            <field name="search_view_id" ref="sale.sale_order_view_search_inherit_sale"/>
+            <field name="context">{'create':False, 'default_is_edi_order':True,'default_is_review':True, 'create': False}</field>
+            <field name="domain">[('is_edi_order', '=', True),('is_review', '=', True)]</field>
+        </record>
+         <menuitem id="menu_sale_order_ca_order_review"
+          name="Review CA Orders" action="action_sale_order_ca_order_review"
+          parent="sale.sale_order_menu"
+          sequence="3" />
+
+
+    </data>
+</odoo>

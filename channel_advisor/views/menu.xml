@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+   <data>
+        <menuitem id="menu_chnl_adv" parent="base.menu_administration" name="Channel Advisor Integration"
+                    sequence="12" />
+
+        <!--<menuitem action="action_edi_config"-->
+                    <!--id="menu_chnl_adv_setting" parent="menu_chnl_adv"-->
+                    <!--sequence="12" />-->
+
+        <!--<menuitem action="action_edi_log"-->
+                    <!--id="menu_chnl_adv_log" parent="menu_chnl_adv"-->
+                    <!--sequence="13" />-->
+
+   </data>
+</odoo>
