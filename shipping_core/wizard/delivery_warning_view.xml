@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="view_deliver_warning" model="ir.ui.view">
+        <field name="name">Delivery Warining</field>
+        <field name="model">delivery.warning</field>
+        <field name="arch" type="xml">
+            <form string="Delivery Warning">
+                <separator
+                    string="A freight BOL is needed for this shipment. A notification has been sent to SRP to create the BOL."
+                    colspan="4" />
+                <footer>
+                    <button name="continue_carrier" string="OK" special="cancel" class="btn-primary" />
+                </footer>
+            </form>
+        </field>
+    </record>
+
+</odoo>

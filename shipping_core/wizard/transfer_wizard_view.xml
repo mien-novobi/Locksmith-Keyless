@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_immediate_transfer_inherit" model="ir.ui.view">
+        <field name="name">stock.immediate.transfer.view.form.inherit</field>
+        <field name="model">stock.immediate.transfer</field>
+        <field name="inherit_id" ref="stock.view_immediate_transfer" />
+        <field name="arch" type="xml">
+            <xpath expr="//group" position="replace">
+                <field name="picking_type" invisible='1' />
+                <group attrs="{'invisible': [('picking_type', '!=', 'outgoing')]}">
+                    <p>
+                        You haven't entered <i>done</i> quantities, by clicking on <i>deliver</i>
+                        Odoo will process all the <i>reserved</i> quantities.
+                    </p>
+                </group>
+                <group attrs="{'invisible': [('picking_type', '=', 'outgoing')]}">
+                    <p>
+                        You haven't entered <i>done</i> quantities, by clicking on <i>receive</i>
+                        Odoo will process all the <i>reserved</i> quantities.
+                    </p>
+                </group>
+            </xpath>
+            <xpath expr="//group[2]" position="after">
+                <separator string="Package Dimensions" attrs="{'invisible': [('picking_type', '!=', 'outgoing')]}" />
+                <field name="dimension_ids"
+                    attrs="{'invisible': [('picking_type', '!=', 'outgoing')], 'required': [('picking_type', '=', 'outgoing')]}">
+                    <tree editable='bottom'>
+                        <field name="picking_type" invisible='1' />
+                        <field name='depth' attrs="{'required': [('picking_type', '=', 'outgoing')]}" />
+                        <field name='width' attrs="{'required': [('picking_type', '=', 'outgoing')]}" />
+                        <field name='height' attrs="{'required': [('picking_type', '=', 'outgoing')]}" />
+                        <field name='weight' attrs="{'required': [('picking_type', '=', 'outgoing')]}" />
+                    </tree>
+                </field>
+            </xpath>
+            <button name="process" position="attributes">
+                <attribute name="string">Deliver</attribute>
+                <attribute name="attrs">{'invisible': [('picking_type', '!=', 'outgoing')]}</attribute>
+            </button>
+            <button name="process" position="after">
+                <button name="process" string="Receive" type="object" class="btn-primary"
+                    attrs="{'invisible': [('picking_type', '=', 'outgoing')]}" />
+            </button>
+        </field>
+    </record>
+
+
+    <record id="view_backorder_confirmation_inherit" model="ir.ui.view">
+        <field name="name">stock_backorder_confirmation.inherit</field>
+        <field name="model">stock.backorder.confirmation</field>
+        <field name="inherit_id" ref="stock.view_backorder_confirmation" />
+        <field name="arch" type="xml">
+            <xpath expr="//group" position="after">
+                <field name="picking_type" invisible='1' />
+                <separator string="Package Dimensions" attrs="{'invisible': [('picking_type', '!=', 'outgoing')]}" />
+                <field name="dimension_ids"
+                    attrs="{'invisible': [('picking_type', '!=', 'outgoing')], 'required': [('picking_type', '=', 'outgoing')]}">
+                    <tree editable='bottom'>
+                        <field name="picking_type" invisible='1' />
+                        <field name='depth' attrs="{'required': [('picking_type', '=', 'outgoing')]}" />
+                        <field name='width' attrs="{'required': [('picking_type', '=', 'outgoing')]}" />
+                        <field name='height' attrs="{'required': [('picking_type', '=', 'outgoing')]}" />
+                        <field name='weight' attrs="{'required': [('picking_type', '=', 'outgoing')]}" />
+                    </tree>
+                </field>
+            </xpath>
+        </field>
+    </record>
+
+
+    <record id="view_overprocessed_transfer_inherit" model="ir.ui.view">
+        <field name="name">stock.overprocessed.transfer.view.form.inherit</field>
+        <field name="model">stock.overprocessed.transfer</field>
+        <field name="inherit_id" ref="stock.view_overprocessed_transfer" />
+        <field name="arch" type="xml">
+            <xpath expr="//footer" position="before">
+                <field name="picking_type" invisible='1' />
+                <separator string="Package Dimensions" attrs="{'invisible': [('picking_type', '=', 'incoming')]}" />
+                <field name="dimension_ids"
+                    attrs="{'invisible': [('picking_type', '=', 'incoming')], 'required': [('picking_type', '=', 'outgoing')]}">
+                    <tree editable='bottom'>
+                        <field name="picking_type" invisible='1' />
+                        <field name='depth' attrs="{'required': [('picking_type', '=', 'outgoing')]}" />
+                        <field name='width' attrs="{'required': [('picking_type', '=', 'outgoing')]}" />
+                        <field name='height' attrs="{'required': [('picking_type', '=', 'outgoing')]}" />
+                        <field name='weight' attrs="{'required': [('picking_type', '=', 'outgoing')]}" />
+                    </tree>
+                </field>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

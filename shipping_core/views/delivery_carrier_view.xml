@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="delivery_carrier_view_order_form_inherit" model="ir.ui.view">
+        <field name="name">delivery.carrier.form.inherit</field>
+        <field name="model">delivery.carrier</field>
+        <field name="inherit_id" ref="delivery.view_delivery_carrier_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="before">
+                <group string="Shipping Information">
+                    <field name="shipping_carrier_id" />
+                    <field name="service_code" />
+                    <field name="freight" />
+                    <field name="delivery_area" />
+                    <field name="shipping_type" />
+                    <field name="model_name" invisible="0" />
+                </group>
+                <group string="Weight and Dimensions" col="4">
+                    <field name="weight" />
+                    <field name="height" />
+                    <field name="width" />
+                    <field name="depth" />
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

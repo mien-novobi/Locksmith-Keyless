@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_partner_form_inheritted_shipstation" model="ir.ui.view">
+        <field name="name">partner.shipping.inherit.shipstation</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="shipping_core.view_partner_form_inheritted_shipping" />
+        <field name="arch" type="xml">
+            <field name="carrier_account_id" position="after">
+                <field name="shipstation_partner_code" />
+            </field>
+        </field>
+    </record>
+
+</odoo>

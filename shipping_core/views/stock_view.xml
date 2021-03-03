@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="shipping_extension_view_stock_form_inherit" model="ir.ui.view">
+        <field name="name">stock.picking.form.inherit</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="delivery.view_picking_withcarrier_out_form" />
+        <field name="arch" type="xml">
+            <button name="button_validate" position="attributes">
+                <attribute name="string">Receive</attribute>
+                <attribute name="attrs">{'invisible': ['|', ('show_validate', '=', False), ('picking_type_code', '=',
+                    'outgoing')]}</attribute>
+                <attribute name="context">"{'pick_id':id}"</attribute>
+            </button>
+            <button name="button_validate" position="after">
+                <button name="action_draft_confirm"
+                    attrs="{'invisible': ['|',('state', '!=', 'draft'),('picking_type_code', 'not in', ['internal','outgoing'])]}"
+                    string="Validate" groups="stock.group_stock_user" type="object" class="oe_highlight"
+                    context="{'pick_id':id}" />
+
+                <button name="button_validate"
+                    attrs="{'invisible': ['|', ('state', '!=', 'assigned'),('picking_type_code', '!=', 'outgoing')]}"
+                    string="Deliver" groups="stock.group_stock_user" type="object" class="oe_highlight"
+                    context="{'pick_id':id}" />
+            </button>
+
+            <xpath expr="//button[@name='open_website_url']" position="attributes">
+                <attribute name="attrs">{'invisible': ['|','|','|','|',('carrier_tracking_ref','=',False),('carrier_id',
+                    '=', False),('delivery_type','=','grid'),('shipping_type','=','shipcollect'), ('picking_type_code',
+                    '!=', 'outgoing')]}</attribute>
+            </xpath>
+
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button type="object" name="print_label" class="oe_stat_button" icon='fa-print' string="Print Label"
+                    attrs="{'invisible': ['|','|','|','|',('carrier_tracking_ref','=',False),('carrier_id', '=', False),('delivery_type','=','grid'),('shipping_type','=','shipcollect'), ('picking_type_code', '!=', 'outgoing')]}" />
+            </xpath>
+            <xpath expr="/form/header/button[last()]" position="after">
+                <button name="%(act_picking_reship)d" string="Reship"
+                    attrs="{'invisible': ['|','|',('picking_type_code', '!=', 'outgoing'), ('state', '!=', 'done'), ('is_locked', '=', False)]}"
+                    type="action" class="oe_highlight" />
+
+            </xpath>
+
+            <label for="weight" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </label>
+            <field name="weight" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </field>
+            <field name="weight_uom_name" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </field>
+
+            <!-- <field name="number_of_packages" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </field> -->
+
+            <!-- <xpath expr="//separator" position="replace" /> -->
+
+            <xpath expr="//group[@name='carrier_data']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <notebook position="inside">
+                <field name="picking_type_code" invisible="1" />
+                <page string="Shipping Info" attrs="{'invisible': [('picking_type_code', '!=', 'outgoing')]}">
+                    <group>
+                        <group>
+                            <label for="weight" />
+                            <div>
+                                <field name="weight" class="oe_inline" />
+                                <field name="weight_uom_name" nolabel="1" class="oe_inline" />
+                            </div>
+                            <field name="no_of_packages" />
+                        </group>
+                        <group>
+                            <field name="shipping_carrier_id" attrs="{'readonly': [('state','in',('done'))]}" />
+                            <field name="carrier_id" domain="[('shipping_carrier_id', '=', shipping_carrier_id)]"
+                                attrs="{'readonly': [('state','in',('done'))]}" />
+                            <field name='carrier_tracking_ref' readonly="1" />
+                            <field name='tracking_url' widget="url"
+                                attrs="{'invisible':[('carrier_tracking_ref','=',False)]}" />
+                            <field name="carrier_price" attrs="{'readonly': [('state','in',('done'))]}" />
+                            <field name="shipping_type" attrs="{'readonly': [('state','in',('done'))]}" />
+                        </group>
+                    </group>
+
+                    <group>
+                        <group col="4" colspan="8">
+                            <field name="dropoff_type_id"
+                                attrs="{'invisible': [('dropoff_type_count','=',0)], 'readonly': [('state','in',('done'))]}"
+                                domain="[('carrier_id', '=', shipping_carrier_id)]" />
+                            <field name="packaging_type_id"
+                                attrs="{'invisible': [('package_type_count','=',0)], 'readonly': [('state','in',('done'))]}"
+                                domain="[('carrier_id', '=', shipping_carrier_id)]" />
+                            <field name="package_detail_id"
+                                attrs="{'invisible': [('packagedetail_count','=',0)], 'readonly': [('state','in',('done'))]}"
+                                domain="[('carrier_id', '=', shipping_carrier_id)]" />
+                            <field name="physical_packaging_id"
+                                attrs="{'invisible': [('physical_packaging_count','=',0)], 'readonly': [('state','in',('done'))]}"
+                                domain="[('carrier_id', '=', shipping_carrier_id)]" />
+                        </group>
+                    </group>
+                    <group>
+                        <group>
+                            <field name="is_ship_collect" />
+                        </group>
+                        <group>
+                            <field name="carrier_name"
+                                attrs="{'required':[('is_ship_collect','=',True)],'invisible':[('is_ship_collect','=',False)],'readonly': [('state','in',('done'))]}" />
+                            <field name="carrier_account_id"
+                                attrs="{'required':[('is_ship_collect','=',True)],'invisible':[('is_ship_collect','=',False)],'readonly': [('state','in',('done'))]}" />
+                        </group>
+                    </group>
+                    <button name='get_rate' type="object" string='Click to get rate' icon="fa-strikethrough"
+                        class="oe_inline oe_stat_button oe_right"
+                        attrs="{'invisible':['|', ('is_ship_collect','=',True), ('carrier_tracking_ref','!=',False)]}" />
+                    <group>
+                        <field name="shipping_quote_lines" attrs="{'invisible':[('is_ship_collect','=',True)]}"
+                            nolabel="1" />
+                    </group>
+
+                    <separator string="Dimensions" />
+
+                    <button name='%(action_import_label_wizard)d' type="action" string='Import Label'
+                        icon="fa-strikethrough" class="oe_inline oe_stat_button oe_right"
+                        attrs="{'invisible':['|',('shipping_type', 'not in', ('freight')), ('state', 'in', ('cancel', 'done'))]}" />
+                    <group>
+                        <field name='dimension_ids' nolabel="1" context="{'picking_id':id}">
+                            <tree>
+                                <field name='package_depth' />
+                                <field name='package_width' />
+                                <field name='package_height' />
+                                <field name='package_weight' />
+                                <field name='unit' />
+                                <field name='tracking_number' readonly='1' />
+                                <field name='rate' readonly='1' invisible='1' />
+                                <field name='attachment_id' invisible='1' />
+                            </tree>
+                            <form>
+                                <group col="4" colspan="2">
+                                    <field name='package_depth' attrs="{'required':[('freight','=',False)]}" />
+                                    <field name='package_width' attrs="{'required':[('freight','=',False)]}" />
+                                    <field name='package_height' attrs="{'required':[('freight','=',False)]}" />
+                                    <field name='package_weight' required='1' />
+                                    <field name='unit' required='1' />
+                                    <field name='tracking_number' readonly='1' />
+                                    <field name='rate' readonly='1' invisible='1' />
+                                    <field name='attachment_id' invisible='1' />
+                                    <field name='picking_id' invisible='1' />
+                                    <field name='freight' invisible='1' />
+                                    <field name='freight_package'
+                                        attrs="{'invisible':['|',('freight','=',False),('shipping_carrier_model','=','ups.connector')]}" />
+                                    <field name='freight_class'
+                                        attrs="{'invisible':['|',('freight','=',False),('shipping_carrier_model','=','ups.connector')]}" />
+                                    <field name='freight_description'
+                                        attrs="{'invisible':['|',('freight','=',False),('shipping_carrier_model','=','ups.connector')]}" />
+                                    <field name='no_of_packages'
+                                        attrs="{'invisible':['|',('freight','=',False),('shipping_carrier_model','=','ups.connector')]}" />
+                                    <field name='shipping_carrier_model' invisible='1' />
+                                </group>
+                            </form>
+                        </field>
+                    </group>
+
+                    <group>
+                        <group>
+                            <field name="package_type_count" invisible='1' />
+                            <field name="packagedetail_count" invisible='1' />
+                        </group>
+                        <group>
+                            <field name="physical_packaging_count" invisible='1' />
+                            <field name="dropoff_type_count" invisible='1' />
+                        </group>
+                    </group>
+
+                </page>
+            </notebook>
+
+            <button name="action_assign" position="attributes">
+                <attribute name="context">"{'raise_warning': True}"</attribute>
+            </button>
+        </field>
+    </record>
+
+</odoo>

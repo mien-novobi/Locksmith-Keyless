@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_partner_form_inheritted_shipping" model="ir.ui.view">
+        <field name="name">partner.shipping.inherit</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="delivery.view_partner_property_form" />
+        <field name="arch" type="xml">
+            <field name="property_delivery_carrier_id" position="after">
+                <field name="carrier_account_id" />
+            </field>
+        </field>
+    </record>
+
+</odoo>

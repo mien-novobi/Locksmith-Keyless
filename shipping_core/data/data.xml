@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<odoo>
+
+    <record model="document.directory" id="dir_ship_label">
+        <field name="name">Shipping Label</field>
+        <field name="user_id" eval="False" />
+        <field name="company_id" eval="False" />
+        <field name="group_ids" eval="[(4, ref('base.group_user'))]" />
+    </record>
+
+</odoo>

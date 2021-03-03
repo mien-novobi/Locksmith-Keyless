@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="shipping_carrier_details_form_inherit" model="ir.ui.view">
+        <field name="name">shippping.carrier.form.view.inherit</field>
+        <field name="model">shipping.carrier</field>
+        <field name="inherit_id" ref="shipping_core.carrier_deatils_form" />
+        <field name="arch" type="xml">
+            <field name="model_name" position='after'>
+                <field name="is_shipstation_carrier" />
+            </field>
+            <field name="company_id" position='after'>
+                <field name="shipstation_carrier_id"
+                    attrs="{'required':[('is_shipstation_carrier','=',True)], 'invisible':[('is_shipstation_carrier','=',False)] }" />
+            </field>
+        </field>
+    </record>
+
+</odoo>

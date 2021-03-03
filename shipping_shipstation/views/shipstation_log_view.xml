@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="shipstation_log_tree_view" model="ir.ui.view">
+        <field name="name">shipstation.log.tree</field>
+        <field name="model">shipstation.log</field>
+        <field name="arch" type="xml">
+            <tree create="false" edit="false" delete="false">
+                <field name="date" />
+                <field name="res_model" />
+                <field name="res_id" />
+                <field name="shipstation_id" />
+                <field name="operation" />
+                <field name="company_id" groups="base.group_multi_company" />
+            </tree>
+        </field>
+    </record>
+
+
+    <record id="shipstation_log_form_view" model="ir.ui.view">
+        <field name="name">shipstation.log.form</field>
+        <field name="model">shipstation.log</field>
+        <field name="arch" type="xml">
+            <form create="false" edit="false" delete="false">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="date" />
+                            <field name="res_model" />
+                            <field name="operation" />
+                            <field name="company_id" groups="base.group_multi_company"
+                                options="{'no_open': True,'no_create': True}" />
+                            <field name="message" />
+                        </group>
+                        <group>
+                            <field name="res_id" />
+                            <field name="shipstation_id" />
+                            <field name="request" />
+                        </group>
+                    </group>
+
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+
+    <record id="shipstation_log_search_view" model="ir.ui.view">
+        <field name="name">shipstation.log.search.view</field>
+        <field name="model">shipstation.log</field>
+        <field name="arch" type="xml">
+            <search string="Logs">
+                <field name="date" />
+                <field name="res_model" />
+                <field name="res_id" />
+                <field name="shipstation_id" />
+                <field name="operation" />
+            </search>
+        </field>
+    </record>
+
+
+    <record id="action_shipstation_log" model="ir.actions.act_window">
+        <field name="name">Shipstation Logs</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">shipstation.log</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="shipstation_log_search_view" />
+        <field name="help" type="html">
+            <p>
+                Here you will find all error logs during sync
+            </p>
+        </field>
+    </record>
+
+
+    <menuitem id="menu_shipstation_logs" name="Log" parent="menu_shipstation_settings" action="action_shipstation_log"
+        sequence="100" />
+
+
+    <record id="shipstation_logger_email_tree_view" model="ir.ui.view">
+        <field name="name">shipstation.logger.email.tree</field>
+        <field name="model">shipstation.logger.email</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="res_model" />
+                <field name="shipstation_account_id" />
+                <field name="operation" />
+                <field name="template_id" />
+            </tree>
+        </field>
+    </record>
+
+
+    <record id="shipstation_logger_email_form_view" model="ir.ui.view">
+        <field name="name">shipstation.email.form</field>
+        <field name="model">shipstation.logger.email</field>
+        <field name="mode">primary</field>
+        <field name="arch" type="xml">
+            <form>
+
+                <sheet>
+                    <group>
+                        <group name="group_left1">
+                            <field name="res_model" />
+                            <field name="operation" />
+                        </group>
+                        <group name="group_right1">
+                            <field name="shipstation_account_id" />
+                            <field name="template_id" />
+                        </group>
+                    </group>
+
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+
+    <record id="shipstation_logger_email_search_view" model="ir.ui.view">
+        <field name="name">shipstation.logger.email.search.view</field>
+        <field name="model">shipstation.logger.email</field>
+        <field name="arch" type="xml">
+            <search string="Logs">
+                <field name="res_model" />
+                <field name="template_id" />
+                <field name="shipstation_account_id" />
+                <group expand="0" string="Group By">
+                    <filter string="Operation" name="groupby_operation" domain="[]"
+                        context="{'group_by': 'operation'}" />
+                </group>
+            </search>
+        </field>
+    </record>
+
+
+    <record id="shipstation_logger_email_action" model="ir.actions.act_window">
+        <field name="name">Shipstation Logs</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">shipstation.logger.email</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="shipstation_logger_email_search_view" />
+        <field name="help" type="html">
+            <p>
+                Here you can configure emails wchih will be triggerd on sync failures
+            </p>
+        </field>
+    </record>
+
+
+    <menuitem id="menu_shipstation_logger_email" name="Email Log" parent="menu_shipstation_settings"
+        action="shipstation_logger_email_action" sequence="500" />
+
+</odoo>

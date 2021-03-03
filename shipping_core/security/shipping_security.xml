@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!--Multicompany record rule-->
+    <record model="ir.rule" id="shipping_carrier_multicompany_rule">
+        <field name="name">Shipping Carrier Multicompany Rule</field>
+        <field name="model_id" ref="model_shipping_carrier" />
+        <field name="global" eval="True" />
+        <field name="domain_force">['|',('company_id','child_of',[user.company_id.id]),('company_id','=',False)]
+        </field>
+    </record>
+
+</odoo>

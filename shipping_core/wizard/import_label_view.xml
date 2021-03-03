@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="view_stock_import_label" model="ir.ui.view">
+        <field name="name">Import Label</field>
+        <field name="model">stock.import.label</field>
+        <field name="arch" type="xml">
+            <form string="Import Label">
+                <group>
+                    <field name="carrier_price" colspan='4' />
+                    <label for="label_lines" string="Import Label" />
+                    <field name='label_lines' nolabel="1" colspan='4'>
+                        <tree>
+                            <field name='package_length' />
+                            <field name='package_breadth' />
+                            <field name='package_height' />
+                            <field name='package_weight' />
+                            <field name='package_unit' />
+                            <field name='tracking_number' />
+                        </tree>
+                        <form>
+                            <group>
+                                <group>
+                                    <field name='package_length' />
+                                    <field name='package_breadth' />
+                                    <field name='package_height' />
+                                </group>
+                                <group>
+                                    <field name='package_weight' />
+                                    <field name='package_unit' />
+                                    <field name='tracking_number' />
+                                    <field name='label' placeholder="Choose a file to import..." />
+                                </group>
+                            </group>
+                        </form>
+                    </field>
+                </group>
+                <footer>
+                    <button string="Import" name="import_label" type="object" default_focus="1" class="btn-primary" />
+                    or
+                    <button string="Cancel" class="btn-default" special="cancel" />
+                </footer>
+            </form>
+        </field>
+    </record>
+
+
+    <record id="action_import_label_wizard" model="ir.actions.act_window">
+        <field name="name">Import Label</field>
+        <field name="res_model">stock.import.label</field>
+        <field name="view_mode">form,tree</field>
+        <field name="target">new</field>
+    </record>
+
+</odoo>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <menuitem id="menu_shipstation_root" name="ShipStation" sequence="30"
+        web_icon="shipping_shipstation,static/description/icon.png" />
+
+    <menuitem id="menu_shipstation_import" name="Import" parent="menu_shipstation_root" sequence="40"
+        action="action_import_export_operation" />
+
+    <menuitem id="menu_shipstation_settings" name="Settings" parent="menu_shipstation_root" sequence="100" />
+
+</odoo>

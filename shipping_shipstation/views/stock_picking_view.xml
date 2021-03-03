@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="shipping_shipstation_stock_picking_form_view" model="ir.ui.view">
+        <field name="name">shipping.shipstation.stock.picking.form</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="delivery.view_picking_withcarrier_out_form" />
+        <field name="arch" type="xml">
+            <notebook position="inside">
+                <page string="Shipstation Info" attrs="{'invisible': [('is_shipstation_order', '=', False)]}">
+                    <group>
+                        <group>
+                            <field name="is_shipstation_order" />
+                            <field name="shipstation_order_id" />
+                            <button name="visit_shipstation" string="Visit Shipstation" type="object"
+                                class="oe_inline fa fa-arrow-right oe_link" />
+                        </group>
+                        <group>
+                            <field name="shipstation_store_id" />
+                            <field name="shipstation_carrier_id" />
+                            <field name="shipstation_service_id" />
+                            <field name="shipstation_order_key" />
+                        </group>
+                    </group>
+                </page>
+            </notebook>
+        </field>
+    </record>
+
+</odoo>

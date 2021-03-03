@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_shipping_quote_tree" model="ir.ui.view">
+        <field name="name">shipping.quote.tree</field>
+        <field name="model">shipping.quote</field>
+        <field name="arch" type="xml">
+            <!-- <tree string="Shipping Quotation" create="0" colors="blue:state == 'used'/red:state == 'cancel'"> -->
+            <tree string="Shipping Quotation" create="0">
+                <field name="state" invisible="1" />
+                <field name='shipping_carrier_id' />
+                <field name='name' />
+                <field name='carrier_id' />
+                <field name='rate' />
+                <field name="markup_rate" />
+                <field name='order_state' invisible='1' />
+                <button name='add_to_order' type='object' icon="fa-check" string='Add to Order'
+                    help='Use this rate in sale order'
+                    attrs="{'invisible':['|',('order_state', 'not in', ('draft', 'sent', 'qa1', 'estimate', 'sale')), ('state','=','used')]}" />
+            </tree>
+        </field>
+    </record>
+
+
+    <record id="view_shipping_quote_form" model="ir.ui.view">
+        <field name="name">shipping.quote.form</field>
+        <field name="model">shipping.quote</field>
+        <field name="arch" type="xml">
+            <form string="Shipping Quotation">
+                <header>
+                    <field name="state" widget="statusbar" />
+                </header>
+                <sheet>
+                    <group readonly="1">
+                        <field name='shipping_carrier_id' />
+                        <field name='name' />
+                        <field name='carrier_id' />
+                        <field name='rate' />
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+
+    <record id="view_shipping_quote_filter" model="ir.ui.view">
+        <field name="name">shipping.quote.select</field>
+        <field name="model">shipping.quote</field>
+        <field name="arch" type="xml">
+            <search string="Search Shipping Quotation">
+                <field name="state" />
+                <field name='shipping_carrier_id' />
+                <field name='carrier_id' />
+                <field name='rate' />
+            </search>
+        </field>
+    </record>
+
+</odoo>

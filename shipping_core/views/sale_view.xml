@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="shipping_extension_view_order_form_inherit" model="ir.ui.view">
+        <field name="name">sale.order.form.inherit</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="delivery.view_order_form_with_carrier" />
+        <field name="arch" type="xml">
+            <!-- <label for="carrier_id" position="replace" /> -->
+            <!-- <field name="carrier_id" position="replace" /> -->
+            <!-- <field name="delivery_price" position="replace" /> -->
+            <!-- <button name="set_delivery_line" position="replace" /> -->
+            <!-- <button name="get_delivery_price" position="replace" /> -->
+
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button type="object" name="open_website_url" class="oe_stat_button" icon='fa-truck' string="Tracking"
+                    attrs="{'invisible': ['|', ('tracking_url','=',False),('carrier_id', '=', False)]}" />
+            </xpath>
+
+            <notebook position="inside">
+                <page string="Shipping Information">
+                    <group>
+                        <group>
+                            <field name="shipping_carrier_id"
+                                attrs="{'readonly':[('state', 'in', ('done', 'cancel'))]}" />
+                            <field name="carrier_id" attrs="{'readonly':[('state', 'in', ('done', 'cancel'))]}"
+                                domain="[('shipping_carrier_id','=',shipping_carrier_id)]" />
+                            <field name='tracking_reference' readonly="1"
+                                attrs="{'invisible':[('state', 'in', ('draft', 'estimate', 'sent', 'qa1'))]}" />
+                            <field name='tracking_url' widget="url" invisible="1" />
+                        </group>
+                        <group>
+                            <field name='weight'
+                                attrs="{'readonly':[('state', 'in', ('done', 'cancel'))] ,'invisible': [('shipping_carrier_id','=',False)]}" />
+                        </group>
+                        <group col="4" colspan="8">
+                            <field name="dropoff_type_id"
+                                attrs="{'readonly':[('state', 'in', ('done', 'cancel'))],'invisible': [('dropoff_type_count','=',0)]}"
+                                domain="[('carrier_id', '=', shipping_carrier_id)]" />
+                            <field name="packaging_type_id"
+                                attrs="{'readonly':[('state', 'in', ('done', 'cancel'))], 'invisible': [('package_type_count','=',0)]}"
+                                domain="[('carrier_id', '=', shipping_carrier_id)]" />
+                            <field name="package_detail_id"
+                                attrs="{'readonly':[('state', 'in', ('done', 'cancel'))], 'invisible': [('packagedetail_count','=',0)]}"
+                                domain="[('carrier_id', '=', shipping_carrier_id)]" />
+                            <field name="physical_packaging_id"
+                                attrs="{'readonly':[('state', 'in', ('done', 'cancel'))], 'invisible': [('physical_packaging_count','=',0)]}"
+                                domain="[('carrier_id', '=', shipping_carrier_id)]" />
+                        </group>
+
+                    </group>
+
+                    <group>
+                        <group>
+                            <field name="is_ship_collect" attrs="{'readonly': [('state','in',('done'))]}" />
+                        </group>
+                        <group>
+                            <field name='carrier_name'
+                                attrs="{'invisible':[('is_ship_collect', '!=', True)] ,'required' :[('is_ship_collect', '=', True)],'readonly': [('state','in',('done', 'cancel'))] }" />
+                            <field name='carrier_account_id'
+                                attrs="{'invisible':[('is_ship_collect', '!=', True)] ,'required' :[('is_ship_collect', '=', True)] , 'readonly':[('state','in',('done', 'cancel'))]}" />
+                        </group>
+                    </group>
+
+                    <group>
+                        <group>
+                            <field name="package_type_count" invisible='1' />
+                            <field name="packagedetail_count" invisible='1' />
+                        </group>
+                        <group>
+                            <field name="physical_packaging_count" invisible='1' />
+                            <field name="dropoff_type_count" invisible='1' />
+                        </group>
+                    </group>
+
+                    <button name='get_rate' type="object" string='Click to get rate' icon="fa-strikethrough"
+                        class="oe_inline oe_stat_button oe_right"
+                        attrs="{'invisible':['|', ('is_ship_collect','=',True), ('state', 'in',('done', 'cancel'))]}" />
+                    <field name="freight" invisible="1" />
+                    <field name='freight_note' string="Note" readonly="1"
+                        attrs="{'invisible':[('freight','=',False)]}" />
+                    <field name='shipping_quote_lines' attrs="{'invisible':[('is_ship_collect','=',True)]}" />
+                </page>
+            </notebook>
+        </field>
+    </record>
+
+</odoo>
