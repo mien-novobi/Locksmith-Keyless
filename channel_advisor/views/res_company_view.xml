@@ -10,7 +10,7 @@
                 <page string="CA Default Product">
                     <group>
                         <field name="shipping_cost_product_id" domain="[('type', '=', 'service')]"/>
-                        <field name="tax_product_id" domain="[('type', '=', 'service')]"/>
+                        <!--<field name="tax_product_id" domain="[('type', '=', 'service')]"/>-->
                         <field name="gift_product_id" domain="[('type', '=', 'service')]"/>
                         <field name="addt_cost_product_id" domain="[('type', '=', 'service')]"/>
                         <field name="insurance_product_id" domain="[('type', '=', 'service')]"/>

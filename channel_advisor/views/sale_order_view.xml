@@ -23,11 +23,16 @@
                 <!--<xpath expr="//field[@name='amount_total']" position="after">-->
                     <!--<field name="margin_percent" string="Margin%"/>-->
                 <!--</xpath>-->
-                <xpath expr="//field[@name='client_order_ref']" position="after">
+                 <xpath expr="//page[@name='other_information']" position="after">
+                     <page string="CA Info" name="ca_information"  attrs="{'invisible':[('is_edi_order', '=', False)]}">
+                    <group>
                     <field name="special_instruction" />
                     <field name="private_note" />
                     <field name="total_price" />
+                    </group>
+                     </page>
                 </xpath>
+
 
             </field>
         </record>
@@ -76,8 +81,8 @@
             <field name="res_model">sale.order</field>
             <field name="view_mode">tree,kanban,form,calendar,pivot,graph</field>
             <field name="search_view_id" ref="sale.sale_order_view_search_inherit_sale"/>
-            <field name="context">{'create':False, 'default_is_fba':True, 'create': False}</field>
-            <field name="domain">[('is_fba', '=', True)]</field>
+            <field name="context">{'create':False, 'default_is_edi_order':True,'default_is_fba':True, 'create': False}</field>
+            <field name="domain">[('is_fba', '=', True),('is_edi_order', '=', True),]</field>
         </record>
          <menuitem id="menu_sale_order_fba_order"
           name="FBA Orders" action="action_sale_order_fba_order"

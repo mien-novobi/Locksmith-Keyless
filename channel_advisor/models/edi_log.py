@@ -177,14 +177,15 @@ class TransactionLogger(models.Model):
         vals ={}
         promo_amt = 0
         taxes = self.env['account.tax']
+        is_review = False
         product = self.env['product.product'].search([('ca_product_id', '=', line.get('ProductID'))])
         if not product:
             raise UserError('Product %s not Found' % line.get('Title'))
 
         if line.get('UnitPrice', '') != product.lst_price:
-            vals.update({"is_review":True})
+            is_review = True
         else:
-            vals.update({"is_review": False})
+            is_review = False
         if line.get('promo_amt'):
             promo_amt = promo_amt + line.get('promo_amt')
 
@@ -207,6 +208,7 @@ class TransactionLogger(models.Model):
             'promotion_code': line.get('promo_code', ''),
             'promo_amt': promo_amt,
             'tax_id': [[6, False, taxes.ids or []]],
+            'is_review':is_review
 
         }
         return vals
