@@ -38,26 +38,26 @@
                             </group>
                         </group>
                         <group string="Components" attrs="{'invisible': [('ca_product_type', '!=', 'Bundle')]}">
-                            <button name="action_update_components" type="object" string="Update Components" icon="fa-refresh"
-                                class="oe_link float-right" colspan="4"></button>
-                            <field name="ca_bundle_product_ids" widget="one2many" nolabel="1">
+                            <button name="action_update_components" type="object" string="Update Components"
+                                icon="fa-refresh" class="oe_link float-right" colspan="4"></button>
+                            <field name="ca_bundle_product_ids" nolabel="1">
                                 <tree editable="bottom">
-                                    <field name="product_id"
+                                    <field name="product_id" required="1"
                                         domain="[('ca_product_type', 'in', ['Item', 'Child']), ('ca_profile_id', '=', parent.ca_profile_id)]" />
                                     <field name="product_type" />
-                                    <field name="quantity" />
+                                    <field name="quantity" required="1" />
                                 </tree>
                             </field>
                         </group>
                         <group string="Bundles"
                             attrs="{'invisible': [('ca_product_type', 'in', ['Bundle', 'Parent'])]}">
-                            <field name="ca_bundle_ids" widget="one2many" nolabel="1"
+                            <field name="ca_bundle_ids" nolabel="1"
                                 context="{'default_product_id': product_variant_id}">
                                 <tree editable="bottom">
                                     <field name="product_id" invisible="1" />
-                                    <field name="bundle_id"
+                                    <field name="bundle_id" required="1"
                                         domain="[('ca_product_type', '=', 'Bundle'), ('ca_profile_id', '=', parent.ca_profile_id)]" />
-                                    <field name="quantity" />
+                                    <field name="quantity" required="1" />
                                 </tree>
                             </field>
                         </group>
@@ -65,8 +65,6 @@
                 </notebook>
             </field>
         </record>
-
-
 
         <record id="channel_adv_product_template_search_view" model="ir.ui.view">
             <field name="name">Channel advisor Product Template Search View</field>
@@ -78,6 +76,66 @@
                 </field>
             </field>
         </record>
+
+
+        <!-- KITS -->
+        <record id="ca_product_bundle_view_tree" model="ir.ui.view">
+            <field name="name">ca.product.bundle.tree</field>
+            <field name="model">ca.product.bundle</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="bundle_id" />
+                    <field name="product_id" />
+                    <field name="product_type" />
+                    <field name="quantity" />
+                </tree>
+            </field>
+        </record>
+
+        <record id="ca_product_bundle_view_form" model="ir.ui.view">
+            <field name="name">ca.product.bundle.form</field>
+            <field name="model">ca.product.bundle</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="bundle_id" required="1" />
+                            </group>
+                            <group>
+                                <field name="product_id" required="1" />
+                                <field name="product_type" readonly="1" />
+                                <field name="quantity" required="1" />
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="ca_product_bundle_view_search" model="ir.ui.view">
+            <field name="name">ca.product.bundle.search</field>
+            <field name="model">ca.product.bundle</field>
+            <field name="arch" type="xml">
+                <search>
+                    <group expand="0" string="Group By">
+                        <filter string="Kit" name="bundle" domain="[]" context="{'group_by':'bundle_id'}" />
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record id="ca_product_bundle_action" model="ir.actions.act_window">
+            <field name="name">Kits</field>
+            <field name="res_model">ca.product.bundle</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="ca_product_bundle_view_tree" />
+            <field name="search_view_id" ref="ca_product_bundle_view_search" />
+            <field name="context">{'search_default_bundle': 1}</field>
+        </record>
+
+        <menuitem id="ca_product_bundle_menu" action="ca_product_bundle_action"
+            parent="stock.menu_stock_inventory_control" sequence="50" />
 
     </data>
 

@@ -84,6 +84,10 @@ class ProductTemplate(models.Model):
 class ProductProduct(models.Model):
     _inherit ='product.product'
 
+    def action_update_components(self):
+        self.ensure_one()
+        return self.product_tmpl_id.action_update_components()
+
     def inventory_update(self):
 
         xml_string = self.get_pdt_xml()
@@ -138,11 +142,11 @@ class ProductBundle(models.Model):
     _name = "ca.product.bundle"
     _description = "Channel Advisor Product Bundle"
 
-    product_id = fields.Many2one('product.product', string="Component")
+    product_id = fields.Many2one('product.product', string="Component", ondelete="cascade")
     product_tmpl_id = fields.Many2one(related="product_id.product_tmpl_id", store=True)
     product_type = fields.Selection(related="product_id.ca_product_type", string="Product type", readonly=True, store=False)
     quantity = fields.Float(string="Quantity", default=1)
-    bundle_id = fields.Many2one('product.template', string="Bundle")
+    bundle_id = fields.Many2one('product.template', string="Bundle", ondelete="cascade")
 
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
