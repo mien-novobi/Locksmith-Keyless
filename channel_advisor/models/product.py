@@ -80,6 +80,9 @@ class ProductTemplate(models.Model):
             self.write({'ca_bundle_product_ids': components})
         return True
 
+    def ca_update_quantity(self):
+        self.mapped('product_variant_id').ca_update_quantity()
+
 
 class ProductProduct(models.Model):
     _inherit ='product.product'
@@ -136,6 +139,27 @@ class ProductProduct(models.Model):
             tree = tree.getroot()
         for prefix, uri in xmlns_uris_dict.items():
             tree.attrib['xmlns:' + prefix] = uri
+
+    def ca_update_quantity(self):
+        dist_centers = self.env['ca.distribution.center'].search([('warehouse_id', '!=', False)])
+        if not dist_centers:
+            return
+
+        Connector = self.env['ca.connector'].sudo()
+        for product in self.filtered(lambda r: r.ca_product_type in ['Item', 'Child']):
+            connector = Connector.search([
+                ('state', '=', 'active'),
+                ('ca_account_ids.account_id', '=', product.ca_profile_id)
+            ], limit=1)
+
+            vals = {'Value': {'UpdateType': 'Absolute', 'Updates': []}}
+            for dist_center in dist_centers:
+                qty_available = product.with_context(warehouse=dist_center.warehouse_id.id).free_qty
+                vals['Value']['Updates'].append({
+                    'DistributionCenterID': int(dist_center.res_id),
+                    'Quantity': int(qty_available),
+                })
+            connector.call('update_quantity', product_id=product.ca_product_id, vals=vals)
 
 
 class ProductBundle(models.Model):

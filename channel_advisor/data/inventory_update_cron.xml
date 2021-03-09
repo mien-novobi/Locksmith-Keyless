@@ -18,10 +18,10 @@
         <field name="name">Channel Advisor: Quantity Update</field>
         <field name="model_id" ref="model_ca_connector" />
         <field name="state">code</field>
-        <field name="code">model._cron_update_quantity()</field>
+        <field name="code">model._cron_update_quantity(limit=1000)</field>
         <field name="user_id" ref="base.user_root" />
-        <field name="interval_number">1</field>
-        <field name="interval_type">days</field>
+        <field name="interval_number">30</field>
+        <field name="interval_type">minutes</field>
         <field name="numbercall">-1</field>
         <field name="doall" eval="False" />
     </record>

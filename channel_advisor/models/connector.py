@@ -259,7 +259,7 @@ class ChannelAdvisorConnector(models.Model):
                 ('ca_profile_id', 'in', profile_ids),
                 ('ca_product_type', 'in', ['Item', 'Child']),
                 '|', ('ca_qty_updated_date', '=', False),
-                ('ca_qty_updated_date', '<', datetime.now() - timedelta(days=1)),
+                ('ca_qty_updated_date', '<', datetime.now() - timedelta(hours=3)),
             ], limit=limit)
             for product in products:
                 try:
