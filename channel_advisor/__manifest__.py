@@ -35,9 +35,7 @@ The module that manages the order generated via Channel Advisor
         'report/report_invoice.xml',
         'report/delivery_slip_report.xml',
     ],
-    'demo': [
-
-    ],
+    'demo': [],
     'installable': True,
     'auto_install': False,
     'application': True,
