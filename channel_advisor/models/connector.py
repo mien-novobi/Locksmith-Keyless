@@ -33,6 +33,8 @@ class ChannelAdvisorConnector(models.Model):
     product_import_nextlink = fields.Char(string="Products Import NextLink")
     orders_import_nextlink = fields.Char(string="Orders Import NextLink")
     orders_item_import_nextlink = fields.Char(string="Items Import NextLink")
+    auto_update_price = fields.Boolean(string="Auto Update Price?", default=False)
+    auto_update_cost = fields.Boolean(string="Auto Update Cost?", default=False)
 
     @api.depends('application_id', 'shared_secret')
     def _compute_client_id(self):
@@ -82,6 +84,14 @@ class ChannelAdvisorConnector(models.Model):
                 header = {'Content-Type': 'application/json'}
                 resource_url = self.base_url + "/v1/Products(%s)/UpdateQuantity?access_token=%s" % (kwargs['product_id'], self._access_token())
                 res = requests.post(resource_url, headers=header, json=kwargs['vals'])
+                # There is nothing to return
+
+        elif method == "update_price":
+            if kwargs.get('product_id') and kwargs.get('vals'):
+                header = {'Content-Type': 'application/json'}
+                resource_url = self.base_url + "/v1/Products(%s)?access_token=%s" % (kwargs['product_id'], self._access_token())
+                res = requests.put(resource_url, headers=header, json=kwargs['vals'])
+                
                 # There is nothing to return
 
         elif method == "refresh_access_token":
@@ -226,9 +236,9 @@ class ChannelAdvisorConnector(models.Model):
                             vals['image_1920'] = base64.b64encode(img_data.content)
 
                     if product:
-                        product.write(vals)
+                        product.with_context(ca_import=True).write(vals)
                     else:
-                        Product.create(vals)
+                        Product.with_context(ca_import=True).create(vals)
                     cr.commit()
                 except Exception as e:
                     cr.rollback()

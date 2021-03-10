@@ -69,6 +69,15 @@
                         <page string="Accounts">
                             <field name="ca_account_ids" nolabel="1" widget="many2many" readonly="1" force_save="1" />
                         </page>
+                        <page string="Update Settings">
+                            <group>
+                                <group>
+                                    <h4 class="pb-2 text-secondary" colspan="2">Price Data</h4>
+                                    <field name="auto_update_price" />
+                                    <field name="auto_update_cost" />
+                                </group>
+                            </group>
+                        </page>
                     </notebook>
                 </sheet>
             </form>

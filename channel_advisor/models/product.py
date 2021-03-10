@@ -53,6 +53,14 @@ class ProductTemplate(models.Model):
     ca_parent_id = fields.Many2one('product.template', string="Parent", compute="_compute_ca_parent_id")
     ca_bundle_ids = fields.One2many('ca.product.bundle', 'product_tmpl_id', string="Bundles")
     ca_bundle_product_ids = fields.One2many('ca.product.bundle', 'bundle_id', string="Components")
+    kit_available = fields.Float(compute="_compute_kit_available", digits="Product Unit of Measure")
+
+    def _compute_kit_available(self):
+        for product in self:
+            if product.ca_product_type == 'Bundle':
+                product.kit_available = min([item.product_id.qty_available // item.quantity for item in product.ca_bundle_product_ids])
+            else:
+                product.kit_available = 0
 
     @api.depends('ca_parent_product_id')
     def _compute_ca_parent_id(self):
@@ -83,9 +91,41 @@ class ProductTemplate(models.Model):
     def ca_update_quantity(self):
         self.mapped('product_variant_id').ca_update_quantity()
 
+    def update_bundle_price(self):
+        for product in self:
+            if product.ca_product_type == 'Bundle':
+                component_price = sum([item.product_id.lst_price * item.quantity for item in product.ca_bundle_product_ids])
+                component_cost = sum([item.product_id.standard_price * item.quantity for item in product.ca_bundle_product_ids])
+                product.write({
+                    'list_price': component_price,
+                    'standard_price': component_cost,
+                })
+
+    def write(self, vals):
+        res = super(ProductTemplate, self).write(vals)
+
+        if 'list_price' in vals or 'ca_bundle_ids' in vals:
+            for product in self:
+                if product.ca_product_type != 'Bundle':
+                    product.ca_bundle_ids.mapped('bundle_id').update_bundle_price()
+
+        if 'ca_bundle_product_ids' in vals:
+            for product in self:
+                if product.ca_product_type == 'Bundle':
+                    product.update_bundle_price()
+
+        if 'list_price' in vals and not self._context.get('ca_import', False):
+            apps = self.env['ca.connector'].sudo().search([('state', '=', 'active'), ('auto_update_price', '=', True)])
+            for app in apps:
+                for product in self.filtered(lambda r: r.ca_profile_id in app.ca_account_ids.mapped('account_id')):
+                    vals = {'RetailPrice': product.list_price}
+                    app.call('update_price', product_id=product.ca_product_id, vals=vals)
+
+        return res
+
 
 class ProductProduct(models.Model):
-    _inherit ='product.product'
+    _inherit = 'product.product'
 
     def action_update_components(self):
         self.ensure_one()
@@ -160,6 +200,22 @@ class ProductProduct(models.Model):
                     'Quantity': int(qty_available),
                 })
             connector.call('update_quantity', product_id=product.ca_product_id, vals=vals)
+
+    def write(self, vals):
+        res = super(ProductProduct, self).write(vals)
+
+        if 'standard_price' in vals:
+            for product in self:
+                if product.ca_product_type != 'Bundle':
+                    product.ca_bundle_ids.mapped('bundle_id').update_bundle_price()
+
+            if not self._context.get('ca_import', False):
+                apps = self.env['ca.connector'].sudo().search([('state', '=', 'active'), ('auto_update_cost', '=', True)])
+                for app in apps:
+                    for product in self.filtered(lambda r: r.ca_profile_id in app.ca_account_ids.mapped('account_id')):
+                        vals = {'Cost': product.standard_price}
+                        app.call('update_price', product_id=product.ca_product_id, vals=vals)
+        return res
 
 
 class ProductBundle(models.Model):
