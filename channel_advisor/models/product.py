@@ -181,7 +181,7 @@ class ProductProduct(models.Model):
             tree.attrib['xmlns:' + prefix] = uri
 
     def ca_update_quantity(self):
-        dist_centers = self.env['ca.distribution.center'].search([('warehouse_id', '!=', False)])
+        dist_centers = self.env['ca.distribution.center'].search([('type', '=', 'Warehouse'), ('warehouse_id', '!=', False)])
         if not dist_centers:
             return
 
