@@ -96,46 +96,50 @@ class SaleOrder(models.Model):
     @api.depends('shipping_carrier_id')
     def _get_carrier_package_type(self):
         # method to update the package_type
-        self.packaging_type_id = None
-        self.package_type_count = 0
         if self.shipping_carrier_id:
             self.package_type_count = len(self.shipping_carrier_id.packaging_type_ids)
-            packaging_type_id = self.env['shipping.packaging.type'].search(
-                [('carrier_id', '=', self.shipping_carrier_id.id), ('is_default', '=', True)], limit=1)
-            self.packaging_type_id = packaging_type_id and packaging_type_id.id
+            packaging_type_id = self.env['shipping.packaging.type'].search([('carrier_id', '=', self.shipping_carrier_id.id), ('is_default', '=', True)], limit=1)
+            if packaging_type_id:
+                self.packaging_type_id = packaging_type_id.id
+        else:
+            self.packaging_type_id = None
+            self.package_type_count = 0
 
     @api.depends('shipping_carrier_id')
     def _get_carrier_packagedetail(self):
         # method to update the package_detail
-        self.package_detail_id = None
-        self.packagedetail_count = 0
         if self.shipping_carrier_id:
             self.packagedetail_count = len(self.shipping_carrier_id.package_detail_ids) or 0
-            package_detail_id = self.env['shipping.package.detail'].search(
-                [('carrier_id', '=', self.shipping_carrier_id.id), ('is_default', '=', True)], limit=1)
-            self.package_detail_id = package_detail_id and package_detail_id.id
+            package_detail_id = self.env['shipping.package.detail'].search([('carrier_id', '=', self.shipping_carrier_id.id), ('is_default', '=', True)], limit=1)
+            if package_detail_id:
+                self.package_detail_id = package_detail_id.id
+        else:
+            self.package_detail_id = None
+            self.packagedetail_count = 0
 
     @api.depends('shipping_carrier_id')
     def _get_carrier_physical_packaging(self):
         # method to update the physical_packaging
-        self.physical_packaging_id = None
-        self.physical_packaging_count = 0
         if self.shipping_carrier_id:
             self.physical_packaging_count = len(self.shipping_carrier_id.physical_packaging_ids) or 0
-            physical_packaging_id = self.env['shipping.physical.packaging'].search(
-                [('carrier_id', '=', self.shipping_carrier_id.id), ('is_default', '=', True)], limit=1)
-            self.physical_packaging_id = physical_packaging_id and physical_packaging_id.id
+            physical_packaging_id = self.env['shipping.physical.packaging'].search([('carrier_id', '=', self.shipping_carrier_id.id), ('is_default', '=', True)], limit=1)
+            if physical_packaging_id:
+                self.physical_packaging_id = physical_packaging_id and physical_packaging_id.id
+        else:
+            self.physical_packaging_id = None
+            self.physical_packaging_count = 0
 
     @api.depends('shipping_carrier_id')
     def _get_dropoff_type_type(self):
         # method to update the dropoff_type
-        self.dropoff_type_id = None
-        self.dropoff_type_count = 0
         if self.shipping_carrier_id:
             self.dropoff_type_count = len(self.shipping_carrier_id.dropoff_type_ids) or 0
-            dropoff_type_id = self.env['shipping.dropoff.type'].search(
-                [('carrier_id', '=', self.shipping_carrier_id.id), ('is_default', '=', True)], limit=1)
-            self.dropoff_type_id = dropoff_type_id and dropoff_type_id.id
+            dropoff_type_id = self.env['shipping.dropoff.type'].search([('carrier_id', '=', self.shipping_carrier_id.id), ('is_default', '=', True)], limit=1)
+            if dropoff_type_id:
+                self.dropoff_type_id = dropoff_type_id.id
+        else:
+            self.dropoff_type_id = None
+            self.dropoff_type_count = 0
 
     #todo client dont need to change the carrier account_id
     # @api.onchange('is_ship_collect')

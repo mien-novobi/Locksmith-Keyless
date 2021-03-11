@@ -190,7 +190,7 @@ class StockPicking(models.Model):
 
     def send_to_shipper(self):
         self.ensure_one()
-        if self.shipped_from_shipstation:
+        if self.shipped_from_shipstation or self.is_shipstation_order:
             return True
         else:
             return super(StockPicking, self).send_to_shipper()
