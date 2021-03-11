@@ -427,14 +427,15 @@ class SaleOrder(models.Model):
 
                         if SaleOrder.picking_ids:
                             for picking in SaleOrder.picking_ids:
-                                for move in picking.move_lines:
-                                    for move_line in move.move_line_ids:
-                                        move_line.qty_done = move_line.product_uom_qty
                                 picking.write({
                                     'carrier_tracking_ref': shipment.get('trackingNumber', ''),
                                     'shipped_from_shipstation': True,
                                 })
-                                picking.action_done()
+                                if picking.state == 'assigned':
+                                    for move in picking.move_lines:
+                                        for move_line in move.move_line_ids:
+                                            move_line.qty_done = move_line.product_uom_qty
+                                    picking.action_done()
                     else:
                         self.env['shipstation.log'].register_log(
                             res_model='sale.order',

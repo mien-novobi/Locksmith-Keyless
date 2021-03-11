@@ -198,10 +198,10 @@ class StockPicking(models.Model):
     def action_done(self):
         self.ensure_one()
         res = super(StockPicking, self).action_done()
-        if self.state == 'done'and self.shipstation_order_id:
-            shipment_values = self.prepare_shipstation_data(operation='update')
-            response = self.shipstation_store_id.account_id._send_request('orders/createorder', shipment_values, method="POST")
-            self.mark_as_shipped()
+        # if self.state == 'done'and self.shipstation_order_id:
+        #     shipment_values = self.prepare_shipstation_data(operation='update')
+        #     response = self.shipstation_store_id.account_id._send_request('orders/createorder', shipment_values, method="POST")
+        #     # self.mark_as_shipped()
         return res
 
 

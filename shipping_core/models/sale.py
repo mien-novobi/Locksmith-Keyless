@@ -334,7 +334,7 @@ class SaleOrder(models.Model):
                         raise UserError(_('The Shipment supports Home Delivery '))
                     if order.carrier_id.name == 'TBD':
                         raise UserError(_("Invalid Data\nPlease Select a valid shipping type"))
-            elif not order.is_edi_order:
+            elif not order.is_edi_order and order.shipping_carrier_id:
                 raise UserError('Country or Zip Code missing in Delivery address')
         return super(SaleOrder, self).action_confirm()
 
