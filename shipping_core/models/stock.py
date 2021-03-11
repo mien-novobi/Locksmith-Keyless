@@ -556,59 +556,58 @@ class StockPicking(models.Model):
             return res[0]
         return res
 
-    def action_done(self):
-        # TDE FIXME: should work in batch
-        self.ensure_one()
-        res = super(StockPicking, self).action_done()
-        if self.shipping_type == 'shipcollect':
-            trackingnumber = 0
-            for dimension in self.dimension_ids:
-                dimension.attachment_id.write({'res_model':self._name, 'res_id':self.id})
-                trackingnumber = dimension.tracking_number
-            self.carrier_tracking_ref = trackingnumber
-        if (not self.shipping_carrier_id or not self.carrier_id) and self.is_ship_collect:
-            if self.carrier_name.lower() in ('fedex', 'ups') :
-                raise UserError(_('Please select a valid Shipping type'))
-            else:
-                if not self.dimension_ids:
-                    raise UserError(_('Warning\nPlease upload a valid Shipping label'))
-                else:
-                    flag = True
-                    for dim in  self.dimension_ids:
-                        if dim.is_used is False and dim.attachment_id:
-                            flag=False
-                            break
-                    if flag:
-                        raise UserError(_('Warning\nPlease upload a valid Shipping labels'))
-        # updates the weight field with shipped weight
-        delivered_weight = 0
-        for line in  self.dimension_ids:
-            delivered_weight += line.package_weight
-        self.weight = delivered_weight
-        # self.send_tracking_mail()
-        if self.sale_id and not self.reshipment:
-            self.sale_id.update_tracking_number(self.carrier_tracking_ref)
-        # call to webservice for printing the label after fetching them
-        base_url = self.env['ir.config_parameter'].get_param(key='web.base.url')
-        labe_link = "/web_label/print_label/ir_attachment/store_fname/datas_fname/"
-        url = ''
-        atta_ids = ''
-        for dimension in self.dimension_ids:
-            atta_ids='%s%s,' %(atta_ids,dimension.attachment_id.id)
-        url="%s%s%s" %(base_url,labe_link,atta_ids)
-        if url.endswith(','):
-            url = url[:-1]
-        if url and atta_ids:
-            return {
-                'type': 'ir.actions.act_url',
-                'res_model': 'ir.actions.act_url',
-                'url': url ,
-                'target': 'new_tab',
-                'before_action':'close',
-                'tag': 'reload',
-            }
-
-        return res
+    # def action_done(self):
+    #     # TDE FIXME: should work in batch
+    #     self.ensure_one()
+    #     res = super(StockPicking, self).action_done()
+    #     if self.shipping_type == 'shipcollect':
+    #         trackingnumber = 0
+    #         for dimension in self.dimension_ids:
+    #             dimension.attachment_id.write({'res_model':self._name, 'res_id':self.id})
+    #             trackingnumber = dimension.tracking_number
+    #         self.carrier_tracking_ref = trackingnumber
+    #     if (not self.shipping_carrier_id or not self.carrier_id) and self.is_ship_collect:
+    #         if self.carrier_name.lower() in ('fedex', 'ups') :
+    #             raise UserError(_('Please select a valid Shipping type'))
+    #         else:
+    #             if not self.dimension_ids:
+    #                 raise UserError(_('Warning\nPlease upload a valid Shipping label'))
+    #             else:
+    #                 flag = True
+    #                 for dim in  self.dimension_ids:
+    #                     if dim.is_used is False and dim.attachment_id:
+    #                         flag=False
+    #                         break
+    #                 if flag:
+    #                     raise UserError(_('Warning\nPlease upload a valid Shipping labels'))
+    #     # updates the weight field with shipped weight
+    #     delivered_weight = 0
+    #     for line in  self.dimension_ids:
+    #         delivered_weight += line.package_weight
+    #     self.weight = delivered_weight
+    #     # self.send_tracking_mail()
+    #     if self.sale_id and not self.reshipment:
+    #         self.sale_id.update_tracking_number(self.carrier_tracking_ref)
+    #     # call to webservice for printing the label after fetching them
+    #     base_url = self.env['ir.config_parameter'].get_param(key='web.base.url')
+    #     labe_link = "/web_label/print_label/ir_attachment/store_fname/datas_fname/"
+    #     url = ''
+    #     atta_ids = ''
+    #     for dimension in self.dimension_ids:
+    #         atta_ids='%s%s,' %(atta_ids,dimension.attachment_id.id)
+    #     url="%s%s%s" %(base_url,labe_link,atta_ids)
+    #     if url.endswith(','):
+    #         url = url[:-1]
+    #     if url and atta_ids:
+    #         return {
+    #             'type': 'ir.actions.act_url',
+    #             'res_model': 'ir.actions.act_url',
+    #             'url': url ,
+    #             'target': 'new_tab',
+    #             'before_action':'close',
+    #             'tag': 'reload',
+    #         }
+    #     return res
 
     def open_website_url(self):
         self.ensure_one()
@@ -669,67 +668,67 @@ class StockPicking(models.Model):
                         picking.write({'dimension_ids':data})
         return True
 
-    def button_validate(self):
-        """
-            overrided to prevent overprocessing of stock move and to pop up immediate transfer wizard
-            if quantity_done and product_uom_qty are same for all moves to enter the picking dimensions
-        """
-        self.ensure_one()
-        picking_type = self.picking_type_id
-        no_quantities_done = all(line.qty_done == 0.0 for line in self.move_line_ids)
-        no_initial_demand = all(move.product_uom_qty == 0.0 for move in self.move_lines)
-        if no_initial_demand and no_quantities_done:
-            raise UserError(_('You cannot validate a transfer if you have not processed any quantity.'))
+    # def button_validate(self):
+    #     """
+    #         overrided to prevent overprocessing of stock move and to pop up immediate transfer wizard
+    #         if quantity_done and product_uom_qty are same for all moves to enter the picking dimensions
+    #     """
+    #     self.ensure_one()
+    #     picking_type = self.picking_type_id
+    #     no_quantities_done = all(line.qty_done == 0.0 for line in self.move_line_ids)
+    #     no_initial_demand = all(move.product_uom_qty == 0.0 for move in self.move_lines)
+    #     if no_initial_demand and no_quantities_done:
+    #         raise UserError(_('You cannot validate a transfer if you have not processed any quantity.'))
 
-        if self._get_overprocessed_stock_moves():
-            raise UserError(_('Quantity to be delivered cannot be greater than quantity ordered'))
+    #     if self._get_overprocessed_stock_moves():
+    #         raise UserError(_('Quantity to be delivered cannot be greater than quantity ordered'))
 
-        if self.picking_type_code == 'outgoing':
-            if self.move_lines and all(line.quantity_done == line.product_uom_qty for line in self.move_lines):
-                if picking_type.use_create_lots or picking_type.use_existing_lots:
-                    lines_to_check = self.move_line_ids
-                    if not no_quantities_done:
-                        lines_to_check = lines_to_check.filtered(lambda line: float_compare(line.qty_done, 0, precision_rounding=line.product_uom_id.rounding))
+    #     if self.picking_type_code == 'outgoing':
+    #         if self.move_lines and all(line.quantity_done == line.product_uom_qty for line in self.move_lines):
+    #             if picking_type.use_create_lots or picking_type.use_existing_lots:
+    #                 lines_to_check = self.move_line_ids
+    #                 if not no_quantities_done:
+    #                     lines_to_check = lines_to_check.filtered(lambda line: float_compare(line.qty_done, 0, precision_rounding=line.product_uom_id.rounding))
 
-                    for line in lines_to_check:
-                        product = line.product_id
-                        if product and product.tracking != 'none':
-                            if not line.lot_name and not line.lot_id:
-                                raise UserError(_('You need to supply a lot/serial number for %s.') % product.display_name)
-                            elif line.qty_done == 0:
-                                raise UserError(_('You cannot validate a transfer if you have not processed any quantity for %s.') % product.display_name)
+    #                 for line in lines_to_check:
+    #                     product = line.product_id
+    #                     if product and product.tracking != 'none':
+    #                         if not line.lot_name and not line.lot_id:
+    #                             raise UserError(_('You need to supply a lot/serial number for %s.') % product.display_name)
+    #                         elif line.qty_done == 0:
+    #                             raise UserError(_('You cannot validate a transfer if you have not processed any quantity for %s.') % product.display_name)
 
-                view = self.env.ref('stock.view_immediate_transfer')
-                wiz = self.env['stock.immediate.transfer'].create({'pick_ids': [(4, self.id)]})
-                return {
-                    'name': _('Immediate Transfer?'),
-                    'type': 'ir.actions.act_window',
-                    'view_type': 'form',
-                    'view_mode': 'form',
-                    'res_model': 'stock.immediate.transfer',
-                    'views': [(view.id, 'form')],
-                    'view_id': view.id,
-                    'target': 'new',
-                    'res_id': wiz.id,
-                    'context': self.env.context,
-                }
-            else:
-                if no_quantities_done:
-                    quantity_todo = {}
-                    quantity_done = {}
-                    for move in self.mapped('move_lines'):
-                        quantity_todo.setdefault(move.product_id.id, 0)
-                        quantity_done.setdefault(move.product_id.id, 0)
-                        quantity_todo[move.product_id.id] += move.product_uom_qty
-                        quantity_done[move.product_id.id] += sum(move.move_line_ids.mapped('product_uom_qty'))
-                    if any(quantity_done[x] < quantity_todo.get(x, 0) for x in quantity_done):
-                        for move in self.move_lines:
-                            if move.move_line_ids:
-                                for move_line in move.move_line_ids:
-                                    move_line.qty_done = move_line.product_uom_qty
-                            else:
-                                move.quantity_done = move.reserved_availability
-        return super(StockPicking, self).button_validate()
+    #             view = self.env.ref('stock.view_immediate_transfer')
+    #             wiz = self.env['stock.immediate.transfer'].create({'pick_ids': [(4, self.id)]})
+    #             return {
+    #                 'name': _('Immediate Transfer?'),
+    #                 'type': 'ir.actions.act_window',
+    #                 'view_type': 'form',
+    #                 'view_mode': 'form',
+    #                 'res_model': 'stock.immediate.transfer',
+    #                 'views': [(view.id, 'form')],
+    #                 'view_id': view.id,
+    #                 'target': 'new',
+    #                 'res_id': wiz.id,
+    #                 'context': self.env.context,
+    #             }
+    #         else:
+    #             if no_quantities_done:
+    #                 quantity_todo = {}
+    #                 quantity_done = {}
+    #                 for move in self.mapped('move_lines'):
+    #                     quantity_todo.setdefault(move.product_id.id, 0)
+    #                     quantity_done.setdefault(move.product_id.id, 0)
+    #                     quantity_todo[move.product_id.id] += move.product_uom_qty
+    #                     quantity_done[move.product_id.id] += sum(move.move_line_ids.mapped('product_uom_qty'))
+    #                 if any(quantity_done[x] < quantity_todo.get(x, 0) for x in quantity_done):
+    #                     for move in self.move_lines:
+    #                         if move.move_line_ids:
+    #                             for move_line in move.move_line_ids:
+    #                                 move_line.qty_done = move_line.product_uom_qty
+    #                         else:
+    #                             move.quantity_done = move.reserved_availability
+    #     return super(StockPicking, self).button_validate()
 
     def action_assign(self):
         self.ensure_one()

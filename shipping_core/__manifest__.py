@@ -22,7 +22,7 @@
         # 'data/data.xml',
 
         'wizard/import_label_view.xml',
-        'wizard/transfer_wizard_view.xml',
+        # 'wizard/transfer_wizard_view.xml',
         'wizard/reshipment_view.xml',
         'wizard/delivery_warning_view.xml',
 
