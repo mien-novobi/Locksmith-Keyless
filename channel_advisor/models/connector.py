@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import json
 import base64
 import requests
 from datetime import datetime, timedelta
@@ -86,12 +87,28 @@ class ChannelAdvisorConnector(models.Model):
                 res = requests.post(resource_url, headers=header, json=kwargs['vals'])
                 # There is nothing to return
 
+        elif method == "batch_update_quantity":
+            batch_data = kwargs.get('batch_data', {})
+            data = []
+            for i, product_id in enumerate(batch_data):
+                data.append("--changeset\nContent-Type: application/http\nContent-Transfer-Encoding: binary\nContent-ID: %(content_id)d\n\nPOST %(resource_url)s HTTP/1.1\nContent-Type: application/json\n\n%(values)s" % {
+                    'content_id': i + 1,
+                    'resource_url': self.base_url + "/V1/Products(%s)/UpdateQuantity" % (product_id),
+                    'values': json.dumps(batch_data[product_id], indent=4),
+                })
+
+            if data:
+                header = {'Content-Type': 'multipart/mixed; boundary=changeset'}
+                request_url = self.base_url + "/v1/$batch?access_token=%s" % (self._access_token())
+                body = "--batch Content-Type: multipart/mixed; boundary=changeset\n%(data)s\n--changeset--\n--batch--" % {'data': '\n'.join(data)}
+                res = requests.post(request_url, headers=header, data=body)
+                # There is nothing to return
+
         elif method == "update_price":
             if kwargs.get('product_id') and kwargs.get('vals'):
                 header = {'Content-Type': 'application/json'}
                 resource_url = self.base_url + "/v1/Products(%s)?access_token=%s" % (kwargs['product_id'], self._access_token())
                 res = requests.put(resource_url, headers=header, json=kwargs['vals'])
-
                 # There is nothing to return
 
         elif method == "refresh_access_token":

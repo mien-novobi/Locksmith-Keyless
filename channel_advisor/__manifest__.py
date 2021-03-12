@@ -30,12 +30,15 @@ The module that manages the order generated via Channel Advisor
         'views/res_company_view.xml',
         'views/purchase_view.xml',
         'views/distribution_center_views.xml',
+        'views/update_queue_views.xml',
         'report/report_saleorder.xml',
         'report/purchase_order_templates.xml',
         'report/report_invoice.xml',
         'report/delivery_slip_report.xml',
     ],
-    'demo': [],
+    'demo': [
+
+    ],
     'installable': True,
     'auto_install': False,
     'application': True,

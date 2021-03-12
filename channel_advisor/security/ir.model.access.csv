@@ -6,3 +6,4 @@ ca_connector_access_manager,ca.connector.manager,model_ca_connector,base.group_e
 ca_account_access_manager,ca.account.manager,model_ca_account,base.group_erp_manager,1,1,1,1
 ca_distribution_center_access_manager,ca.distribution.center.manager,model_ca_distribution_center,base.group_erp_manager,1,1,1,1
 ca_product_bundle_access_user,ca.product.bundle.user,model_ca_product_bundle,base.group_user,1,1,1,1
+ca_update_queue_access_manager,ca.update.queue.manager,model_ca_update_queue,base.group_erp_manager,1,1,1,1
