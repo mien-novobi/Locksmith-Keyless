@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import datetime
+
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 import odoo.addons.decimal_precision as dp
@@ -9,7 +11,6 @@ from xml.etree.ElementTree import Element, SubElement
 from xml.etree import ElementTree
 from xml.dom import minidom
 import xml.etree.ElementTree as ET
-import datetime
 
 
 class CustomerProduct(models.Model):
@@ -54,6 +55,14 @@ class ProductTemplate(models.Model):
     ca_bundle_ids = fields.One2many('ca.product.bundle', 'product_tmpl_id', string="Bundles")
     ca_bundle_product_ids = fields.One2many('ca.product.bundle', 'bundle_id', string="Components")
     kit_available = fields.Float(compute="_compute_kit_available", digits="Product Unit of Measure")
+    free_qty = fields.Float(compute="_compute_free_qty", string="Free To Use Quantity", digits="Product Unit of Measure", compute_sudo=False)
+
+    @api.depends()
+    def _compute_free_qty(self):
+        variants_available = self.mapped('product_variant_ids')._product_available()
+        for template in self:
+            free_qty = sum([variants_available[product.id]['free_qty'] or 0 for product in template.product_variant_ids])
+            template.free_qty = free_qty
 
     def _compute_kit_available(self):
         for product in self:

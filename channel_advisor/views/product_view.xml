@@ -91,6 +91,21 @@
                     <field name="kit_available" widget="statinfo" nolabel="1" class="mr4"
                         attrs="{'invisible': [('ca_product_type', '!=', 'Bundle')]}" />
                 </xpath>
+
+                <!-- Qty Free -->
+                <button name="action_product_tmpl_forecast_report" position="after">
+                    <button name="action_product_tmpl_forecast_report" type="object"
+                        attrs="{'invisible':[('type', '!=', 'product'), ('ca_product_type', 'in ', ['Child', 'Item'])]}"
+                        context="{'default_product_tmpl_id': id}" class="oe_stat_button" icon="fa-cubes">
+                        <div class="o_field_widget o_stat_info">
+                            <span class="o_stat_value">
+                                <field name="free_qty" widget="statinfo" nolabel="1" class="mr4" />
+                                <field name="uom_name" />
+                            </span>
+                            <span class="o_stat_text">Available Qty.</span>
+                        </div>
+                    </button>
+                </button>
             </field>
         </record>
 
@@ -106,6 +121,21 @@
                     <field name="kit_available" widget="statinfo" nolabel="1" class="mr4"
                         attrs="{'invisible': [('ca_product_type', '!=', 'Bundle')]}" />
                 </xpath>
+
+                <!-- Qty Free -->
+                <button name="action_product_forecast_report" position="after">
+                    <button name="action_product_forecast_report" type="object"
+                        attrs="{'invisible':[('type', '!=', 'product'), ('ca_product_type', 'in ', ['Child', 'Item'])]}"
+                        context="{'default_product_tmpl_id': id}" class="oe_stat_button" icon="fa-cubes">
+                        <div class="o_field_widget o_stat_info">
+                            <span class="o_stat_value">
+                                <field name="free_qty" widget="statinfo" nolabel="1" class="mr4" />
+                                <field name="uom_name" />
+                            </span>
+                            <span class="o_stat_text">Available Qty.</span>
+                        </div>
+                    </button>
+                </button>
             </field>
         </record>
 
