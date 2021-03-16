@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Part of Odoo. See LICENSE file for full copyright and licensing details.
+
 
 {
     'name': 'Channel Advisor Integration',
@@ -42,3 +42,5 @@ The module that manages the order generated via Channel Advisor
     'auto_install': False,
     'application': True,
 }
+
+# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
