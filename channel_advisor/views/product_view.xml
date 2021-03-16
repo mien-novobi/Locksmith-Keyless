@@ -35,28 +35,28 @@
                             <group>
                                 <field name="ca_brand" readonly="1" />
                                 <field name="ca_mpn" readonly="1" />
+                                <field name="is_kit" />
                             </group>
                         </group>
-                        <group string="Components" attrs="{'invisible': [('ca_product_type', '!=', 'Bundle')]}">
+                        <group string="Components" attrs="{'invisible': [('is_kit', '=', False)]}">
                             <button name="action_update_components" type="object" string="Update Components"
-                                icon="fa-refresh" class="oe_link float-right" colspan="4"></button>
+                                attrs="{'invisible': [('ca_product_type', '!=', 'Bundle')]}" icon="fa-refresh"
+                                class="oe_link float-right" colspan="4"></button>
                             <field name="ca_bundle_product_ids" nolabel="1">
                                 <tree editable="bottom">
                                     <field name="product_id" required="1"
                                         domain="[('ca_product_type', 'in', ['Item', 'Child']), ('ca_profile_id', '=', parent.ca_profile_id)]" />
-                                    <field name="product_type" />
                                     <field name="quantity" required="1" />
                                 </tree>
                             </field>
                         </group>
-                        <group string="Bundles"
-                            attrs="{'invisible': [('ca_product_type', 'in', ['Bundle', 'Parent'])]}">
+                        <group string="Bundles" attrs="{'invisible': [('is_kit', '=', True)]}">
                             <field name="ca_bundle_ids" nolabel="1"
                                 context="{'default_product_id': product_variant_id}">
                                 <tree editable="bottom">
                                     <field name="product_id" invisible="1" />
                                     <field name="bundle_id" required="1"
-                                        domain="[('ca_product_type', '=', 'Bundle'), ('ca_profile_id', '=', parent.ca_profile_id)]" />
+                                        domain="[('is_kit', '=', True), ('ca_profile_id', '=', parent.ca_profile_id)]" />
                                     <field name="quantity" required="1" />
                                 </tree>
                             </field>
@@ -85,21 +85,24 @@
             <field name="inherit_id" ref="stock.product_template_form_view_procurement_button" />
             <field name="arch" type="xml">
                 <xpath expr="//button//field[@name='qty_available']" position="attributes">
-                    <attribute name="attrs">{'invisible': [('ca_product_type', '=', 'Bundle')]}</attribute>
+                    <attribute name="attrs">{'invisible': [('is_kit', '=', True)]}</attribute>
                 </xpath>
                 <xpath expr="//button//field[@name='qty_available']" position="after">
                     <field name="kit_available" widget="statinfo" nolabel="1" class="mr4"
-                        attrs="{'invisible': [('ca_product_type', '!=', 'Bundle')]}" />
+                        attrs="{'invisible': [('is_kit', '=', False)]}" />
                 </xpath>
 
                 <!-- Qty Free -->
                 <button name="action_product_tmpl_forecast_report" position="after">
                     <button name="action_product_tmpl_forecast_report" type="object"
-                        attrs="{'invisible':[('type', '!=', 'product'), ('ca_product_type', 'in ', ['Child', 'Item'])]}"
-                        context="{'default_product_tmpl_id': id}" class="oe_stat_button" icon="fa-cubes">
+                        attrs="{'invisible':[('type', '!=', 'product')]}" context="{'default_product_tmpl_id': id}"
+                        class="oe_stat_button" icon="fa-cubes">
                         <div class="o_field_widget o_stat_info">
                             <span class="o_stat_value">
-                                <field name="free_qty" widget="statinfo" nolabel="1" class="mr4" />
+                                <field name="free_qty" widget="statinfo" nolabel="1" class="mr4"
+                                    attrs="{'invisible': [('is_kit', '=', True)]}" />
+                                <field name="kit_free_qty" widget="statinfo" nolabel="1" class="mr4"
+                                    attrs="{'invisible': [('is_kit', '=', False)]}" />
                                 <field name="uom_name" />
                             </span>
                             <span class="o_stat_text">Available Qty.</span>
@@ -115,21 +118,24 @@
             <field name="inherit_id" ref="stock.product_form_view_procurement_button" />
             <field name="arch" type="xml">
                 <xpath expr="//button//field[@name='qty_available']" position="attributes">
-                    <attribute name="attrs">{'invisible': [('ca_product_type', '=', 'Bundle')]}</attribute>
+                    <attribute name="attrs">{'invisible': [('is_kit', '=', True)]}</attribute>
                 </xpath>
                 <xpath expr="//button//field[@name='qty_available']" position="after">
                     <field name="kit_available" widget="statinfo" nolabel="1" class="mr4"
-                        attrs="{'invisible': [('ca_product_type', '!=', 'Bundle')]}" />
+                        attrs="{'invisible': [('is_kit', '=', False)]}" />
                 </xpath>
 
                 <!-- Qty Free -->
                 <button name="action_product_forecast_report" position="after">
                     <button name="action_product_forecast_report" type="object"
-                        attrs="{'invisible':[('type', '!=', 'product'), ('ca_product_type', 'in ', ['Child', 'Item'])]}"
-                        context="{'default_product_tmpl_id': id}" class="oe_stat_button" icon="fa-cubes">
+                        attrs="{'invisible':[('type', '!=', 'product')]}" context="{'default_product_tmpl_id': id}"
+                        class="oe_stat_button" icon="fa-cubes">
                         <div class="o_field_widget o_stat_info">
                             <span class="o_stat_value">
-                                <field name="free_qty" widget="statinfo" nolabel="1" class="mr4" />
+                                <field name="free_qty" widget="statinfo" nolabel="1" class="mr4"
+                                    attrs="{'invisible': [('is_kit', '=', True)]}" />
+                                <field name="kit_free_qty" widget="statinfo" nolabel="1" class="mr4"
+                                    attrs="{'invisible': [('is_kit', '=', False)]}" />
                                 <field name="uom_name" />
                             </span>
                             <span class="o_stat_text">Available Qty.</span>
@@ -162,11 +168,11 @@
                     <sheet>
                         <group>
                             <group>
-                                <field name="bundle_id" required="1" />
+                                <field name="bundle_id" required="1" domain="[('is_kit', '=', True)]" />
                             </group>
                             <group>
-                                <field name="product_id" required="1" />
-                                <field name="product_type" readonly="1" />
+                                <field name="product_id" required="1"
+                                    domain="[('ca_product_type', 'in', ['Item', 'Child'])]" />
                                 <field name="quantity" required="1" />
                             </group>
                         </group>
@@ -198,6 +204,7 @@
 
         <menuitem id="ca_product_bundle_menu" action="ca_product_bundle_action"
             parent="stock.menu_stock_inventory_control" sequence="50" />
+
 
         <record id="ca_update_quantity_action" model="ir.actions.server">
             <field name="name">ChannelAdvisor: Update Quantity</field>

@@ -241,6 +241,7 @@ class ChannelAdvisorConnector(models.Model):
                         'ca_mpn': values.get('MPN') or '',
                         'ca_product_type': values.get('ProductType') or '',
                         'ca_parent_product_id': values.get('ParentProductID') or '',
+                        'is_kit': True if values.get('ProductType') == 'Bundle' else False,
                     }
                     product = Product.search([('ca_product_id', '=', values.get('ID')), ('ca_profile_id', '=', values.get('ProfileID'))])
                     if not product:
@@ -292,7 +293,11 @@ class ChannelAdvisorConnector(models.Model):
                 try:
                     vals = {'Value': {'UpdateType': 'Absolute', 'Updates': []}}
                     for dist_center in dist_centers:
-                        qty_available = product.with_context(warehouse=dist_center.warehouse_id.id).free_qty
+                        if product.is_kit:
+                            qty_available = product.with_context(warehouse=dist_center.warehouse_id.id).kit_free_qty
+                        else:
+                            qty_available = product.with_context(warehouse=dist_center.warehouse_id.id).free_qty
+
                         vals['Value']['Updates'].append({
                             'DistributionCenterID': int(dist_center.res_id),
                             'Quantity': int(qty_available),

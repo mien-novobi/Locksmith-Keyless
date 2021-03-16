@@ -55,7 +55,9 @@ class ProductTemplate(models.Model):
     ca_bundle_ids = fields.One2many('ca.product.bundle', 'product_tmpl_id', string="Bundles")
     ca_bundle_product_ids = fields.One2many('ca.product.bundle', 'bundle_id', string="Components")
     kit_available = fields.Float(compute="_compute_kit_available", digits="Product Unit of Measure")
+    kit_free_qty = fields.Float(compute="_compute_kit_available", string="Free To Use Kits", digits="Product Unit of Measure", compute_sudo=False)
     free_qty = fields.Float(compute="_compute_free_qty", string="Free To Use Quantity", digits="Product Unit of Measure", compute_sudo=False)
+    is_kit = fields.Boolean(string="Kit?", default=False)
 
     @api.depends()
     def _compute_free_qty(self):
@@ -64,12 +66,20 @@ class ProductTemplate(models.Model):
             free_qty = sum([variants_available[product.id]['free_qty'] or 0 for product in template.product_variant_ids])
             template.free_qty = free_qty
 
+    @api.depends()
     def _compute_kit_available(self):
-        for product in self:
-            if product.ca_product_type == 'Bundle':
-                product.kit_available = min([item.product_id.qty_available // item.quantity for item in product.ca_bundle_product_ids])
+        for template in self:
+            if template.is_kit:
+                kit_available_qtys = []
+                kit_free_qtys = []
+                for item in template.ca_bundle_product_ids:
+                    kit_available_qtys += [item.product_id.qty_available // item.quantity]
+                    kit_free_qtys += [item.product_id.free_qty // item.quantity]
+                template.kit_available = min(kit_available_qtys, default=0)
+                template.kit_free_qty = min(kit_free_qtys, default=0)
             else:
-                product.kit_available = 0
+                template.kit_available = 0
+                template.kit_free_qty = 0
 
     @api.depends('ca_parent_product_id')
     def _compute_ca_parent_id(self):
@@ -102,7 +112,7 @@ class ProductTemplate(models.Model):
 
     def update_bundle_price(self):
         for product in self:
-            if product.ca_product_type == 'Bundle':
+            if product.is_kit:
                 component_price = sum([item.product_id.lst_price * item.quantity for item in product.ca_bundle_product_ids])
                 component_cost = sum([item.product_id.standard_price * item.quantity for item in product.ca_bundle_product_ids])
                 product.write({
@@ -115,12 +125,12 @@ class ProductTemplate(models.Model):
 
         if 'list_price' in vals or 'ca_bundle_ids' in vals:
             for product in self:
-                if product.ca_product_type != 'Bundle':
+                if not product.is_kit:
                     product.ca_bundle_ids.mapped('bundle_id').update_bundle_price()
 
         if 'ca_bundle_product_ids' in vals:
             for product in self:
-                if product.ca_product_type == 'Bundle':
+                if product.is_kit:
                     product.update_bundle_price()
 
         if 'list_price' in vals and not self._context.get('ca_import', False):
@@ -203,7 +213,11 @@ class ProductProduct(models.Model):
 
             vals = {'Value': {'UpdateType': 'Absolute', 'Updates': []}}
             for dist_center in dist_centers:
-                qty_available = product.with_context(warehouse=dist_center.warehouse_id.id).free_qty
+                if product.is_kit:
+                    qty_available = product.with_context(warehouse=dist_center.warehouse_id.id).kit_free_qty
+                else:
+                   qty_available = product.with_context(warehouse=dist_center.warehouse_id.id).free_qty
+
                 vals['Value']['Updates'].append({
                     'DistributionCenterID': int(dist_center.res_id),
                     'Quantity': int(qty_available),
@@ -215,7 +229,7 @@ class ProductProduct(models.Model):
 
         if 'standard_price' in vals:
             for product in self:
-                if product.ca_product_type != 'Bundle':
+                if not product.is_kit:
                     product.ca_bundle_ids.mapped('bundle_id').update_bundle_price()
 
             if not self._context.get('ca_import', False):
@@ -230,6 +244,7 @@ class ProductProduct(models.Model):
 class ProductBundle(models.Model):
     _name = "ca.product.bundle"
     _description = "Channel Advisor Product Bundle"
+    _rec_name = "bundle_id"
 
     product_id = fields.Many2one('product.product', string="Component", ondelete="cascade")
     product_tmpl_id = fields.Many2one(related="product_id.product_tmpl_id", store=True)

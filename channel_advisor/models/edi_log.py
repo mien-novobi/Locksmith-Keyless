@@ -352,14 +352,20 @@ class TransactionLogger(models.Model):
                 error_message = ''
                 try:
                     SaleOrder = self.create_order(vals,center_dict)
+                    cr.commit()
                 except Exception as e:
+                    cr.rollback()
                     error_message = e
                     SaleOrder = False
                     if error_message:
                         self.create({'message': error_message,'name': "Error in Order Import"})
-                cr.commit()
-            except Exception :
+                        cr.commit()
+            except Exception as e:
                 cr.rollback()
+                error_message = e
+                if error_message:
+                    self.create({'message': error_message, 'name': "Error in Order Import"})
+                    cr.commit()
         if res.get('@odata.nextLink') and connector:
             connector.write(
                 {'orders_import_nextlink': res.get('@odata.nextLink', '').split('$skip=')[1]})

@@ -12,11 +12,9 @@ class StockMove(models.Model):
             UpdateQueue = self.env['ca.update.queue'].sudo()
             for move in self.filtered(lambda r: r.product_id.ca_product_type in ['Item', 'Child']):
                 if move.state == 'done' or (move.picking_type_id.code == 'outgoing' and move.state == 'assigned'):
-                    if not UpdateQueue.search([('update_type', '=', 'quantity'), ('product_id', '=', move.product_id.id)]):
-                        UpdateQueue.create({
-                            'update_type': 'quantity',
-                            'product_id': move.product_id.id,
-                        })
+                    UpdateQueue.push(move.product_id, 'quantity')
+                    for kit in move.product_id.ca_bundle_ids.mapped('bundle_id').filtered(lambda r: r.ca_product_type in ['Item', 'Child']):
+                        UpdateQueue.push(kit.product_variant_id, 'quantity')
         return res
 
 

@@ -35,10 +35,9 @@ The module that manages the order generated via Channel Advisor
         'report/purchase_order_templates.xml',
         'report/report_invoice.xml',
         'report/delivery_slip_report.xml',
+        'report/purchase_quotation_templates.xml',
     ],
-    'demo': [
-
-    ],
+    'demo': [],
     'installable': True,
     'auto_install': False,
     'application': True,

@@ -18,6 +18,15 @@ class UpdateQueue(models.Model):
     ], string="Type")
 
     @api.model
+    def push(self, product, update_type='quantity'):
+        if product and not self.search([('update_type', '=', update_type), ('product_id', '=', product.id)]):
+            self.create({
+                'update_type': update_type,
+                'product_id': product.id,
+            })
+        return True
+
+    @api.model
     def _cron_process_update_queue(self, batch_size=80):
         cr = self.env.cr
 
@@ -48,7 +57,11 @@ class UpdateQueue(models.Model):
                 for product in products:
                     vals = {'Value': {'UpdateType': 'Absolute', 'Updates': []}}
                     for dist_center in dist_centers:
-                        qty_available = product.with_context(warehouse=dist_center.warehouse_id.id).free_qty
+                        if product.is_kit:
+                            qty_available = product.with_context(warehouse=dist_center.warehouse_id.id).kit_free_qty
+                        else:
+                            qty_available = product.with_context(warehouse=dist_center.warehouse_id.id).free_qty
+
                         vals['Value']['Updates'].append({
                             'DistributionCenterID': int(dist_center.res_id),
                             'Quantity': int(qty_available),
