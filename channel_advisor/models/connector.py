@@ -200,12 +200,14 @@ class ChannelAdvisorConnector(models.Model):
 
     def _import_products(self, run_by="auto"):
         cr = self.env.cr
+        imported_date = datetime.now()
         Product = self.env['product.product'].sudo()
         categories = {categ.name: categ.id for categ in self.env['product.category'].sudo().search([])}
         for app in self:
             date_filter = False
             if app.products_imported_date:
-                date_filter = "UpdateDateUtc ge %s" % app.products_imported_date.strftime("%Y-%m-%dT%H:%M:%SZ")
+                last_imported_date = app.products_imported_date - timedelta(minutes=10)
+                date_filter = "UpdateDateUtc ge %s" % last_imported_date.strftime("%Y-%m-%dT%H:%M:%SZ")
 
             select = [
                 'ID',
@@ -269,7 +271,7 @@ class ChannelAdvisorConnector(models.Model):
             else:
                 app.write({
                     'product_import_nextlink': '',
-                    'products_imported_date': datetime.now(),
+                    'products_imported_date': imported_date,
                 })
                 cr.commit()
 

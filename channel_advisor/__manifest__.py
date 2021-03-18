@@ -43,4 +43,5 @@ The module that manages the order generated via Channel Advisor
     'application': True,
 }
 
+
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
