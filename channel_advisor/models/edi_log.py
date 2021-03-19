@@ -344,7 +344,7 @@ class TransactionLogger(models.Model):
 
         date_filter = False
         if connector.orders_imported_date:
-            last_imported_date = connector.orders_imported_date - timedelta(minutes=10)
+            last_imported_date = connector.orders_imported_date - timedelta(minutes=60)
             date_filter = "CreatedDateUtc ge %s" % last_imported_date.strftime("%Y-%m-%dT%H:%M:%SZ")
         res = connector.call('import_orders', filter=date_filter)
         center_dict = {center.res_id: center.warehouse_id.id for center in self.env['ca.distribution.center'].search([])}
