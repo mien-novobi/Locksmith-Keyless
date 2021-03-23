@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-# Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import datetime
 from odoo import api, fields, models, _
@@ -9,7 +8,9 @@ class Partner(models.Model):
     _inherit = 'res.partner'
 
     edi_partner = fields.Boolean(string= "CA Customer")
-    ca_site_id = fields.Integer(string='CAsiteid')
+    ca_site_id = fields.Integer(string='CA Site ID')
+    commission = fields.Float(string='Commission %', default=0.0)
+
     # edi_order  = fields.Boolean(string="Enable 850")
     # edi_ack = fields.Boolean(string="Enable 855 ")
     # edi_inv = fields.Boolean(string="Enable 810")
@@ -19,10 +20,6 @@ class Partner(models.Model):
     # receiver_unique_code = fields.Char('Reciever Unique Id', copy=False)
     # reciever_company_name = fields.Char(string='Reciever Company Name')
     # vendor_number = fields.Char('Vendor')
-
-
-
-Partner()
 
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

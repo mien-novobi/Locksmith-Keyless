@@ -329,6 +329,9 @@ class TransactionLogger(models.Model):
                             pack.write({'qty_done': pack.product_qty})
                     saleorder.picking_ids.action_done()
 
+            # Creating and Validating Invoice
+            invoices = saleorder._create_invoices(final=True)
+            invoices.post()
         return saleorder
 
 
