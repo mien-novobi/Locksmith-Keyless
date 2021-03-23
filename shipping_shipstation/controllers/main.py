@@ -20,13 +20,14 @@ class Shipstation(http.Controller):
         data = request.jsonrequest and request.jsonrequest or {}
         logging.error(data)
         order_obj = request.env['sale.order'].sudo()
+        ShipstationOrder = request.env['shipstation.order'].sudo()
         if data.get('resource_type') == 'SHIP_NOTIFY':
             logging.error('Ship Notify')
             order_obj.update_order_from_shipstation_webhook(data.get('resource_url'), account)
             return 'SUCCESS'
         if data.get('resource_type') == 'ORDER_NOTIFY':
             logging.error('ORDER_NOTIFY')
-            order_obj.import_order_from_webhook_notification(data.get('resource_url'), account)
+            ShipstationOrder.import_order_from_webhook_notification(data.get('resource_url'), account)
             return 'SUCCESS'
         return 'FAILURE'
 

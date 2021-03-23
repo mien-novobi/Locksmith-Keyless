@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="shipstation_order_view_tree" model="ir.ui.view">
+        <field name="name">shipstation.order.tree</field>
+        <field name="model">shipstation.order</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="order_number" />
+                <field name="order_id" />
+                <field name="order_key" />
+                <field name="order_date" />
+            </tree>
+        </field>
+    </record>
+
+    <record id="shipstation_order_view_form" model="ir.ui.view">
+        <field name="name">shipstation.order.form</field>
+        <field name="model">shipstation.order</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="order_number" required="1" />
+                            <field name="order_id" required="1" />
+                            <field name="order_key" required="1" />
+                            <field name="order_date" />
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="shipstation_order_action" model="ir.actions.act_window">
+        <field name="name">ShipStation Orders</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">shipstation.order</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{}</field>
+    </record>
+
+    <menuitem id="shipstation_order_menu" parent="menu_shipstation_settings" action="shipstation_order_action"
+        sequence="50" />
+
+</odoo>

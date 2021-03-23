@@ -17,5 +17,6 @@ from . import shipping_carrier
 from . import shipstation_connector
 from . import shipstation_log
 from . import shipping_quote
+from . import shipstation_order
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

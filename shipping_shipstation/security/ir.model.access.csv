@@ -31,3 +31,5 @@ access_shipstation_warehouse_manager,shipstation.warehouse.manager,shipping_ship
 access_shipstation_connector,shipstation.connector,shipping_shipstation.model_shipstation_connector,sales_team.group_sale_manager,1,1,1,1
 access_shipstation_log,shipstation_log_public,shipping_shipstation.model_shipstation_log,base.group_system,1,1,1,1
 access_shipstation_logger_email,shipstation_logger_email_public,shipping_shipstation.model_shipstation_logger_email,base.group_system,1,1,1,1
+shipstation_order_access_user,shipstation.order.user,model_shipstation_order,base.group_user,1,1,1,0
+shipstation_order_access_manager,shipstation.order.manager,model_shipstation_order,sales_team.group_sale_manager,1,1,1,1

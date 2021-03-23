@@ -37,7 +37,8 @@
         'views/shipstation_connector_view.xml',
         'views/shipstation_product_view.xml',
         'views/res_partner_view.xml',
-        'views/shipstation_log_view.xml'
+        'views/shipstation_log_view.xml',
+        'views/shipstation_order_views.xml',
     ],
     'installable': True,
     'auto_install': False,

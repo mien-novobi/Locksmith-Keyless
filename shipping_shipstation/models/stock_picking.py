@@ -195,13 +195,32 @@ class StockPicking(models.Model):
         else:
             return super(StockPicking, self).send_to_shipper()
 
+    def restore_from_hold(self):
+        ShipstationOrder = self.env['shipstation.order'].sudo()
+        for picking in self:
+            data = {}
+            shipstation_account = False
+            sale_order = picking.sale_id
+            if sale_order.shipstation_order_id:
+                data['orderId'] = sale_order.shipstation_order_id
+                shipstation_account = sale_order.shipstation_account_id
+            elif sale_order.chnl_adv_order_id:
+                shipping_order = ShipstationOrder.search([('order_number', '=', sale_order.chnl_adv_order_id)], limit=1)
+                if shipping_order:
+                    data['orderId'] = shipping_order.order_id
+                    shipstation_account = shipping_order.account_id
+            if shipstation_account and data:
+                res = shipstation_account._send_request('orders/restorefromhold', data, method="POST")
+        return True
+
     def action_done(self):
         self.ensure_one()
         res = super(StockPicking, self).action_done()
-        if self.state == 'done'and self.shipstation_order_id:
-            shipment_values = self.prepare_shipstation_data(operation='update')
-            response = self.shipstation_store_id.account_id._send_request('orders/createorder', shipment_values, method="POST")
-            # self.mark_as_shipped()
+        if self.state == 'done' and self.picking_type_id.code == 'outgoing':
+            if self.shipstation_order_id:
+                shipment_values = self.prepare_shipstation_data(operation='update')
+                response = self.shipstation_store_id.account_id._send_request('orders/createorder', shipment_values, method="POST")
+            self.restore_from_hold()
         return res
 
 
