@@ -346,5 +346,21 @@ class ChannelAdvisorConnector(models.Model):
         self.ensure_one()
         self.state = 'draft'
 
+    def action_update_quantity(self):
+        self.ensure_one()
+        UpdateQueue = self.env['ca.update.queue']
+
+        products = self.env['product.product'].search([('ca_product_type', 'in', ['Item', 'Child']), ('ca_product_id', '!=', False)])
+        queued_items = UpdateQueue.search([('update_type', '=', 'quantity')]).mapped('product_id')
+        products_to_update = products - queued_items
+
+        for product in products_to_update:
+            UpdateQueue.create({
+                'update_type': 'quantity',
+                'product_id': product.id,
+            })
+
+        return True
+
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

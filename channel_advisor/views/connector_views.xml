@@ -29,6 +29,8 @@
                         attrs="{'invisible': [('state', '=', 'draft')]}" />
                     <button name="action_import_orders" type="object" string="Import Orders"
                         attrs="{'invisible': [('state', '=', 'draft')]}" />
+                    <button name="action_update_quantity" type="object" string="Update Quantity"
+                        attrs="{'invisible': [('state', '=', 'draft')]}" />
                     <field name="state" widget="statusbar" statusbar_visible="active" />
                 </header>
                 <sheet>
