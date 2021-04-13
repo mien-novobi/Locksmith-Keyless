@@ -15,13 +15,13 @@ class ShippingQuote(models.Model):
 
         sale_order = self.sale_id
         if sale_order:
+            package_id = sale_order.shipstation_package_id.id or False
             sale_order.onchange_shipping_carrier_id_ss()
             sale_order.onchange_carrier_id_ss()
 
-            packages = {package.name: package.id for package in self.sale_id.shipstation_carrier_id.package_ids}
             service_name = (self.name or '').split('-')
-            package_id = False
-            if len(service_name) > 1:
+            if not package_id and len(service_name) > 1:
+                packages = {package.name: package.id for package in self.sale_id.shipstation_carrier_id.package_ids}
                 package_id = packages.get(service_name[1].strip(), False)
             sale_order.shipstation_package_id = package_id
 
