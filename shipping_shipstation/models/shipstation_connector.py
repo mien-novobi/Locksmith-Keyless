@@ -45,6 +45,7 @@ class shipstation_connector(models.Model):
             rate_data = {
                 "carrierCode": data.get('shipstation_carrier_id') and data.get('shipstation_carrier_id').code,
                 "serviceCode": data.get('shipstation_service_id') and data.get('shipstation_service_id').code or None,
+                'packageCode': data.get('shipstation_package_id') and data.get('shipstation_package_id').code or None,
                 "fromPostalCode": sender.get('zip', ''),
                 "toState": recipient.get('state_code', ''),
                 "toCountry": recipient.get('country_code', ''),

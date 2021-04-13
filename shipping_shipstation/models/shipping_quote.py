@@ -13,9 +13,17 @@ class ShippingQuote(models.Model):
             self = self.browse(quote_id)
         self.ensure_one()
 
-        if self.sale_id:
-            self.sale_id.onchange_shipping_carrier_id_ss()
-            self.sale_id.onchange_carrier_id_ss()
+        sale_order = self.sale_id
+        if sale_order:
+            sale_order.onchange_shipping_carrier_id_ss()
+            sale_order.onchange_carrier_id_ss()
+
+            packages = {package.name: package.id for package in self.sale_id.shipstation_carrier_id.package_ids}
+            service_name = (self.name or '').split('-')
+            package_id = False
+            if len(service_name) > 1:
+                package_id = packages.get(service_name[1].strip(), False)
+            sale_order.shipstation_package_id = package_id
 
         return res
 

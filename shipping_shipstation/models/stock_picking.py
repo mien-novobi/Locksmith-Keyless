@@ -14,6 +14,7 @@ class StockPicking(models.Model):
     shipstation_exported = fields.Boolean(string="Exported to Shipstation", copy=False)
     shipstation_carrier_id = fields.Many2one('shipstation.carrier', string="ShipStation Carrier")
     shipstation_service_id = fields.Many2one('shipstation.service', string="ShipStation Service")
+    shipstation_package_id = fields.Many2one('shipstation.packages','Package', copy=False)
     shipstation_store_id = fields.Many2one('shipstation.store', string="ShipStation Store")
     shipstation_shipment_id = fields.Char(string="ShipStation Shipment ID", copy=False)
     shipped_from_shipstation = fields.Boolean(string="Shipped From Shipstation", copy=False)
@@ -60,6 +61,7 @@ class StockPicking(models.Model):
                 'shipstation_carrier_id': self.shipstation_carrier_id,
                 'shipstation_service_id': self.shipstation_service_id,
                 'shipstation_store_id': self.shipstation_store_id,
+                'shipstation_package_id': self.shipstation_package_id,
             })
         return res
 
@@ -90,6 +92,7 @@ class StockPicking(models.Model):
                     "customerEmail": picking.partner_id.email,
                     "carrierCode": picking.shipstation_carrier_id.code,
                     "serviceCode": picking.shipstation_service_id.code,
+                    'packageCode': picking.shipstation_package_id.code or None,
                     "weight": {
                         "value": picking.weight,
                         "units": "pounds",
@@ -244,6 +247,7 @@ class StockMove(models.Model):
                     'shipstation_order_key' : sale_order.shipstation_order_key,
                     'shipstation_carrier_id' : sale_order.shipstation_carrier_id.id,
                     'shipstation_service_id' : sale_order.shipstation_service_id.id,
+                    'shipstation_package_id' : sale_order.shipstation_package_id.id,
                 })
         return res
 

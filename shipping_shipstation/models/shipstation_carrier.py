@@ -24,6 +24,7 @@ class ShipstationCarrier(models.Model):
     shipping_provide_id = fields.Char("Shipping Provider ID")
     account_id = fields.Many2one("shipstation.accounts", "Accounts", required=True, ondelete='restrict', help="Account in which carrier is configured")
     company_id = fields.Many2one('res.company', string='Company', required=True)
+    package_ids = fields.One2many('shipstation.packages', 'carrier_id', string="Packages")
 
     def open_service_view(self):
         [action] = self.env.ref('shipping_shipstation.action_shipstation_service').read()

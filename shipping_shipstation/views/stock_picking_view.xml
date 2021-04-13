@@ -19,6 +19,7 @@
                             <field name="shipstation_store_id" />
                             <field name="shipstation_carrier_id" />
                             <field name="shipstation_service_id" />
+                            <field name="shipstation_package_id" />
                             <field name="shipstation_order_key" />
                         </group>
                     </group>

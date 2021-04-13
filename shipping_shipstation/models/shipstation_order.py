@@ -14,7 +14,7 @@ class ShipstaionOrder(models.Model):
     _rec_name = "order_number"
 
     order_id = fields.Char(string="Order ID")
-    order_key = fields.Char(string="Order ID")
+    order_key = fields.Char(string="Order Key")
     order_date = fields.Datetime(string="Order Date")
     order_number = fields.Char(string="Order Number")
     account_id = fields.Many2one('shipstation.accounts', string="ShipStation Account")

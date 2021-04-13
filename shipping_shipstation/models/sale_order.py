@@ -21,6 +21,7 @@ class SaleOrder(models.Model):
     prepared_for_shipstation = fields.Boolean('Prepared for Shipstation', copy=False)
     shipstation_carrier_id = fields.Many2one('shipstation.carrier','Shipstation Carrier', copy=False)
     shipstation_service_id = fields.Many2one('shipstation.service','Shipstation Service', copy=False)
+    shipstation_package_id = fields.Many2one('shipstation.packages','Package', copy=False)
     shipped_from_shipstation = fields.Boolean(string='Shipped From Shipstation', copy=False)
     shipstation_order_key = fields.Char(string='Shipstation Order Key', copy=False)
     sscc_id = fields.Char(string='SSCC ID', copy=False)
@@ -46,6 +47,7 @@ class SaleOrder(models.Model):
     def onchange_carrier_id_ss(self):
         if self.carrier_id:
             self.shipstation_store_id = self.carrier_id.shipstation_store_id.id
+            self.shipstation_package_id = self.carrier_id.shipstation_package_id.id
             if self.carrier_id.shipstation_service_id:
                 self.shipstation_service_id = self.carrier_id.shipstation_service_id.id
             if self.carrier_id.shipstation_carrier_id:
@@ -54,6 +56,7 @@ class SaleOrder(models.Model):
             self.shipstation_store_id = False
             self.shipstation_service_id = False
             self.shipstation_account_id = False
+            self.shipstation_package_id = False
 
     def _generate_shipping_data(self):
         res = super(SaleOrder, self)._generate_shipping_data()
@@ -62,7 +65,8 @@ class SaleOrder(models.Model):
                 'shipstation_carrier_id' : self.shipstation_carrier_id,
                 'shipstation_service_id' : self.shipstation_service_id,
                 'shipstation_store_id' : self.shipstation_store_id,
-                'shipstation_account_id' : self.shipstation_account_id
+                'shipstation_account_id' : self.shipstation_account_id,
+                'shipstation_package_id': self.shipstation_package_id,
             })
         return res
 
