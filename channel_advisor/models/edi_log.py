@@ -85,6 +85,7 @@ class TransactionLogger(models.Model):
                     'PrivateNotes': node.get('PrivateNotes', ''),
                     'TotalGiftOptionTaxPrice': node.get('TotalGiftOptionTaxPrice', ''),
                     'TotalShippingTaxPrice': node.get('TotalShippingTaxPrice', ''),
+                    'Paymentstatus' : node.get('PaymentStatus', ''),
                     })
         if ship_info:
             res.update({'ship_info': ship_info})
@@ -320,7 +321,7 @@ class TransactionLogger(models.Model):
                 saleorder.write(vals)
         else:
             saleorder = SaleOrder.create(vals)
-            if Customer.name != 'Checkout Direct':
+            if Customer.name != 'Checkout Direct' and data.get('Paymentstatus') == 'Cleared' :
                 saleorder.action_confirm()
                 saleorder.write({'date_order': data.get('date_order')})
                 if saleorder.is_fba:
