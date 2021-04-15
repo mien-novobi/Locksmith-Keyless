@@ -390,6 +390,46 @@ class TransactionLogger(models.Model):
 
         return True
 
+    @api.model
+    def _cron_confirm_ca_order(self, limit=None):
+        connector = self.env['ca.connector'].sudo().search([('state', '=', 'active')], limit=1)
+        if not connector:
+            return False
+
+        cr = self.env.cr
+        SaleOrder = self.env ['sale.order'].sudo()
+        orders = SaleOrder.search([
+            ('is_edi_order', '=', True),
+            ('chnl_adv_order_id', '!=', False),
+            ('state', 'in', ['draft', 'sent']),
+        ], limit=limit)
+
+        for order in orders:
+            try:
+                res = connector.call('get_payment_status', order_id=order.chnl_adv_order_id) or {}
+                if res.get('PaymentStatus', 'pending') == 'Cleared':
+                    order.action_confirm()
+                    if res.get('CreatedDateUtc'):
+                        order_date = self.convert_date_time(res['CreatedDateUtc'])
+                        order.write({'date_order': order_date})
+
+                    if order.is_fba:
+                        for pack in order.picking_ids.move_line_ids:
+                            if pack.product_qty > 0:
+                                pack.write({'qty_done': pack.product_qty})
+                        order.picking_ids.action_done()
+
+                    cr.commit()
+
+                    if order.invoice_status == 'to invoice':
+                        invoices = order._create_invoices(final=True)
+                        invoices.post()
+                        cr.commit()
+
+            except Exception as e:
+                cr.rollback()
+
+        return True
 
 
-
+# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

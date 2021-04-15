@@ -140,6 +140,12 @@ class ChannelAdvisorConnector(models.Model):
                 res = requests.get(resource_url)
                 data = res.json()
 
+        elif method == "get_payment_status":
+            if kwargs.get('order_id'):
+                resource_url = self.base_url + "/v1/Orders(%s)?access_token=%s&$select=PaymentStatus,CreatedDateUtc" % (kwargs['order_id'], self._access_token())
+                res = requests.get(resource_url)
+                data = res.json()
+
         return data
 
     def _refresh_access_token(self):
