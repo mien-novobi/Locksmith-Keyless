@@ -316,19 +316,18 @@ class TransactionLogger(models.Model):
         SaleOrder = self.env ['sale.order']
         saleorder = SaleOrder.search(
             [('chnl_adv_order_id', '=', data.get('order_no')),('state', 'not in', ['cancel'])], limit=1)
-        if saleorder:
-            if saleorder.state in  ['draft', 'sent']:
-                saleorder.write(vals)
-        else:
+
+        if not saleorder:
             saleorder = SaleOrder.create(vals)
-            if Customer.name != 'Checkout Direct' and data.get('Paymentstatus') == 'Cleared' :
-                saleorder.action_confirm()
-                saleorder.write({'date_order': data.get('date_order')})
-                if saleorder.is_fba:
-                    for pack in saleorder.picking_ids.move_line_ids:
-                        if pack.product_qty > 0:
-                            pack.write({'qty_done': pack.product_qty})
-                    saleorder.picking_ids.action_done()
+
+        if saleorder.state in  ['draft', 'sent'] and Customer.name != 'Checkout Direct' and data.get('Paymentstatus') == 'Cleared':
+            saleorder.action_confirm()
+            saleorder.write({'date_order': data.get('date_order')})
+            if saleorder.is_fba:
+                for pack in saleorder.picking_ids.move_line_ids:
+                    if pack.product_qty > 0:
+                        pack.write({'qty_done': pack.product_qty})
+                saleorder.picking_ids.action_done()
 
         return saleorder
 
