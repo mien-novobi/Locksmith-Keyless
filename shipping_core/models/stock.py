@@ -390,8 +390,8 @@ class StockPicking(models.Model):
             for line in picking.move_lines: #row.pack_operation_product_ids
                 if line.product_id and line.product_id.type == 'service':
                     continue
-                if not(line.product_id.weight and line.product_id.depth and line.product_id.height and line.product_id.width):
-                    raise UserError(_('Warning!\n The product %s does not have proper dimension or weight values.\nPlease consider adding them.' % line.product_id.name))
+                if not line.product_id.weight:
+                    raise UserError(_('The product %s does not have weight values' % line.product_id.name))
                 if line.product_id and line.product_id.depth > depth:
                     depth = line.product_id.depth
                 if line.product_id and line.product_id.height > height:
