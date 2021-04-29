@@ -6,6 +6,14 @@
         <field name="model">stock.picking</field>
         <field name="inherit_id" ref="delivery.view_picking_withcarrier_out_form" />
         <field name="arch" type="xml">
+            <field name="shipping_carrier_id" position="before">
+                <field name="use_shipstation" />
+            </field>
+            <field name="carrier_price" position="before">
+                <field name="shipstation_package_id" domain="[('carrier_id', '=', shipstation_carrier_id)]"
+                options="{'no_create': True, 'no_create_edit':True}" />
+            </field>
+
             <notebook position="inside">
                 <page string="Shipstation Info" attrs="{'invisible': [('is_shipstation_order', '=', False)]}">
                     <group>
@@ -19,12 +27,32 @@
                             <field name="shipstation_store_id" />
                             <field name="shipstation_carrier_id" />
                             <field name="shipstation_service_id" />
-                            <field name="shipstation_package_id" />
                             <field name="shipstation_order_key" />
+                            <field name="carrier_tracking_ref" />
                         </group>
                     </group>
                 </page>
             </notebook>
+            <field name="shipping_quote_lines" position="inside">
+                <tree string="Shipping Quotation" create="0">
+                    <field name="state" invisible="1" />
+                    <field name='shipping_carrier_id' />
+                    <field name='name' />
+                    <field name='carrier_id' />
+                    <field name='rate' />
+                    <field name="markup_rate" />
+                    <field name='order_state' invisible='1' />
+                    <button name='add_carrier_to_picking' type='object' icon="fa-check" string='Add to Order'
+                        attrs="{'invisible':[('state','=','used')]}" />
+                </tree>
+            </field>
+
+            <button name='get_rate' position="attributes">
+                <attribute name="attrs">{'invisible':['|', '|', ('is_ship_collect','=',True), ('carrier_tracking_ref','!=',False), ('use_shipstation', '=', False)]}</attribute>
+            </button>
+            <field name="shipping_quote_lines" position="attributes">
+                <attribute name="attrs">{'invisible':['|', ('is_ship_collect','=',True), ('use_shipstation', '=', False)]}</attribute>
+            </field>
         </field>
     </record>
 

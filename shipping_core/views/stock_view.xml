@@ -69,7 +69,7 @@
                             <label for="weight" />
                             <div>
                                 <field name="weight" class="oe_inline" />
-                                <field name="weight_uom_name" nolabel="1" class="oe_inline" />
+                                <!-- <field name="weight_uom_name" nolabel="1" class="oe_inline" /> -->
                             </div>
                             <field name="no_of_packages" />
                         </group>
@@ -77,7 +77,7 @@
                             <field name="shipping_carrier_id" attrs="{'readonly': [('state','in',('done'))]}" />
                             <field name="carrier_id" domain="[('shipping_carrier_id', '=', shipping_carrier_id)]"
                                 attrs="{'readonly': [('state','in',('done'))]}" />
-                            <field name='carrier_tracking_ref' readonly="1" />
+                            <!-- <field name='carrier_tracking_ref' readonly="1" /> -->
                             <field name='tracking_url' widget="url"
                                 attrs="{'invisible':[('carrier_tracking_ref','=',False)]}" />
                             <field name="carrier_price" attrs="{'readonly': [('state','in',('done'))]}" />

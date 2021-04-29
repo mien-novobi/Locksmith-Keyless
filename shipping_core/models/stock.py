@@ -376,6 +376,7 @@ class StockPicking(models.Model):
         ShippingQuote = self.env['shipping.quote']
         for picking in self:
             vals = {}
+            res = []
             if picking.shipping_quote_lines:
                 picking.shipping_quote_lines.unlink()
             delivery_area = ('domestic', 'both')
@@ -406,50 +407,67 @@ class StockPicking(models.Model):
                 if not picking.shipping_carrier_id:
                     picking.shipping_carrier_id = picking.carrier_id.shipping_carrier_id and picking.carrier_id.shipping_carrier_id.id
                 res = self.env[picking.shipping_carrier_id.model_name].get_rate(data)
-                res = len(res) and res[0]
-                if picking.company_id and picking.company_id.markup_rate :
-                    carrier_charge = float(res.get('rate', 0.0))
-                    rate = carrier_charge + carrier_charge * (picking.company_id.markup_rate/100)
-                    res.update({'rate': carrier_charge, 'markup_rate': rate})
-                ShippingQuote.create({'picking_id':picking.id, 'weight':weight, 'shipping_carrier_id':picking.shipping_carrier_id.id, 'carrier_id':picking.carrier_id.id, 'rate':res.get('rate'), 'markup_rate': res.get('markup_rate')})
+                for vals in res:
+                    if picking.company_id and picking.company_id.markup_rate :
+                        carrier_charge = float(vals.get('rate', 0.0))
+                        rate = carrier_charge + carrier_charge * (picking.company_id.markup_rate/100)
+                        vals.update({'rate': carrier_charge, 'markup_rate': rate})
 
+                    ShippingQuote.create({
+                        'name': vals.get('service_name'),
+                        'picking_id': picking.id,
+                        'weight': weight,
+                        'shipping_carrier_id': picking.shipping_carrier_id.id,
+                        'carrier_id': picking.carrier_id.id,
+                        'rate': vals.get('rate'),
+                        'markup_rate': vals.get('markup_rate'),
+                    })
             else:
                 try:
                     AvailableCarriers = picking.shipping_carrier_id or self.env['shipping.carrier'].search([('company_id','=', picking.company_id.id),('active','=',True)])
-                    services = []
                     carrier_response = []
+                    available_services = {}
                     for ShippingCarrier in AvailableCarriers:
-                        available_services = []
                         checked_residential = False
                         residential = False
-                        for method in self.env['delivery.carrier'].search([('shipping_carrier_id', '=', ShippingCarrier.id), ('delivery_area', 'in', delivery_area),('company_id','=', picking.company_id.id)]):
-                            if (method.weight > 0 and method.weight >= weight or method.weight < 0 and abs(method.weight) <= weight) or \
-                            ( method.height > 0 and method.height >= height or method.height < 0 and abs(method.height) <= height) or \
-                            (method.width > 0 and method.width >= width or method.width < 0 and abs(method.width) <= width) or \
-                            (method.depth > 0 and method.depth >= depth or method.depth < 0 and abs(method.depth) <= depth):
+                        delivery_carriers = self.env['delivery.carrier'].search([
+                            ('shipping_carrier_id', '=', ShippingCarrier.id),
+                            ('delivery_area', 'in', delivery_area),
+                        ])
+                        for method in delivery_carriers:
+                             if (method.weight > 0 and method.weight >= weight) or (method.weight < 0 and abs(method.weight) <= weight):
                                 if not checked_residential:
                                     residential = method.validate_residential_address(partner=picking.partner_id)
                                     checked_residential = True
-                                available_services.append(method.service_code)
-                        services.extend(available_services)
-                        data.update({'available_services':available_services, 'is_residential' : residential})
-                        response = self.env[ShippingCarrier.model_name].get_all_rates(data)
+                                available_services[method.service_code] = method
+
+                        data.update({'is_residential': residential})
+                        data.update(picking.sale_id._update_shipping_data(ShippingCarrier))
+
+                        response = self.env[ShippingCarrier.model_name].get_rate(data)
                         carrier_response.extend(response)
-                    if not carrier_response:
-                        raise UserError("Rate request error")
+
                     for carrier in carrier_response:
-                        if carrier.get('service_type','') and carrier.get('service_type','') in services:
-                            DeliveryCarrier = self.env['delivery.carrier'].search([('service_code','=',carrier.get('service_type','')),('company_id','=', picking.company_id.id)], limit=1)
+                        delivery_carrier = available_services.get(carrier.get('service_type', ''))
+                        if delivery_carrier:
                             if picking.company_id and picking.company_id.markup_rate :
                                 charge = float(carrier.get('rate',0.0))
-                                rate = charge + charge*(picking.company_id.markup_rate/100)
+                                rate = charge + charge * (picking.company_id.markup_rate / 100)
                                 carrier.update({'rate': charge, 'markup_rate': rate})
-                            ShippingQuote.create({'picking_id':picking.id, 'shipping_carrier_id':DeliveryCarrier.shipping_carrier_id.id, 'weight':weight, 'carrier_id':DeliveryCarrier.id, 'rate':carrier.get('rate'), 'markup_rate': carrier.get('markup_rate')})
+                            ShippingQuote.create({
+                                'name': carrier.get('service_name'),
+                                'picking_id': picking.id,
+                                'shipping_carrier_id': delivery_carrier.shipping_carrier_id.id,
+                                'weight': weight,
+                                'carrier_id': delivery_carrier.id,
+                                'rate': carrier.get('rate'),
+                                'markup_rate': carrier.get('markup_rate'),
+                            })
                 except Exception as e:
                     _logger.error(e)
 
             if weight:
-                for quote in self.env['shipping.quote'].search([('weight', '!=', weight), ('picking_id', '=', picking.id)]):
+                for quote in ShippingQuote.search([('weight', '!=', weight), ('picking_id', '=', picking.id)]):
                     quote.unlink()
             return vals
 
