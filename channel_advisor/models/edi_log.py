@@ -168,6 +168,7 @@ class TransactionLogger(models.Model):
 
             del_addr = customer.create(vals)
         return del_addr
+
     def process_line_item(self, line, customer):
         """
         Process line item and return dict of values to create sale line
@@ -334,7 +335,7 @@ class TransactionLogger(models.Model):
 
     def _import_orders(self):
         cr = self.env.cr
-        imported_date = datetime.now()
+        imported_date = datetime.now() - timedelta(minutes=10)
         if self.env.context.get('from_cron'):
             connector = self.env['ca.connector'].search([('state', '=', 'active'), ('auto_import_orders', '=', True)], limit=1)
         else:
@@ -345,7 +346,7 @@ class TransactionLogger(models.Model):
         date_filter = False
         if connector.orders_imported_date:
             last_imported_date = connector.orders_imported_date - timedelta(minutes=60)
-            date_filter = "CreatedDateUtc ge %s" % last_imported_date.strftime("%Y-%m-%dT%H:%M:%SZ")
+            date_filter = "CreatedDateUtc ge %s and CreatedDateUtc lt %s" % (last_imported_date.strftime("%Y-%m-%dT%H:%M:%SZ"), imported_date.strftime("%Y-%m-%dT%H:%M:%SZ"))
         res = connector.call('import_orders', filter=date_filter)
         center_dict = {center.res_id: center.warehouse_id.id for center in self.env['ca.distribution.center'].search([])}
         for values in res.get('value', []):
