@@ -11,12 +11,13 @@ class PosOrder(models.Model):
         order_id = super(PosOrder, self)._process_order(order, draft, existing_order)
 
         pos_order = self.browse(order_id)
-        if pos_order.partner_id and pos_order.config_id.sms_notify and pos_order.config_id.sms_template_id:
+        partner = pos_order.partner_id
+        if partner and (partner.mobile or partner.phone) and pos_order.config_id.sms_notify and pos_order.config_id.sms_template_id:
             template = pos_order.config_id.sms_template_id
             message = template._render_template(template.body, 'pos.order', pos_order.ids)[pos_order.id]
             self.env['sms.sms'].sudo().create({
                 'body': message,
-                'partner_id': pos_order.partner_id.id,
+                'number': partner.mobile or partner.phone,
             }).send()
 
         return order_id
