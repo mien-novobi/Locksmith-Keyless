@@ -8,13 +8,36 @@
         <field name="arch" type="xml">
             <div id="iface_invoicing" position="inside">
                 <div class="o_setting_left_pane" attrs="{'invisible': [('module_account', '=', False)]}">
-                    <field name="auto_invoice"/>
+                    <field name="auto_invoice" />
                 </div>
                 <div class="o_setting_right_pane" attrs="{'invisible': [('module_account', '=', False)]}">
                     <label for="auto_invoice" />
                     <div class="text-muted">
                         Print invoices automatically.
-                     </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="accounting_section" position="after">
+                <h2>Notification</h2>
+                <div class="row mt16 o_settings_container" id="notify_section">
+                    <div class="col-12 col-lg-6 o_setting_box">
+                        <div class="o_setting_left_pane">
+                            <field name="sms_notify" />
+                        </div>
+                        <div class="o_setting_right_pane">
+                            <label for="sms_notify" string="Send Order Review SMS?" />
+                            <div class="text-muted"></div>
+                            <div class="content-group">
+                                <div class="row mt16">
+                                    <label for="sms_template_id" string="SMS Tempalte" class="col-lg-3 o_light_label"
+                                        attrs="{'invisible': [('sms_notify', '=', False)]}" />
+                                    <field name="sms_template_id" domain="[('model_id.model', '=', 'pos.order')]"
+                                        attrs="{'invisible': [('sms_notify', '=', False)], 'required': [('sms_notify', '=', True)]}" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </field>

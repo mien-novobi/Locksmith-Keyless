@@ -20,6 +20,10 @@
     'website': 'https://www.confianzit.com',
     'depends':  ['point_of_sale'],
     'data': [
+        'security/sms_security.xml',
+
+        'data/sms_data.xml',
+
         'views/assets.xml',
         'views/pos_config_view.xml',
     ],

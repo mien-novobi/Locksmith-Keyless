@@ -1,0 +1,14 @@
+<?xml version="1.0" ?>
+<odoo>
+    <record id="pos_order_review_sms_template" model="sms.template">
+        <field name="name">POS Order: Feedback Message</field>
+        <field name="model_id" ref="point_of_sale.model_pos_order" />
+        <field name="body">
+            Hi ${object.partner_id.name}!  Thanks for your purchase. Please tell us if you liked our service by clicking below link:
+            https://g.page/LocksmithKeylessUSA/review?gm
+
+            Thanks!
+            JI
+        </field>
+    </record>
+</odoo>
