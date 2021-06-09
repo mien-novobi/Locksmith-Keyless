@@ -28,5 +28,18 @@
             <field name="doall" eval="False" />
         </record>
 
+
+        <record id="ca_order_reimport" model="ir.cron">
+            <field name="name">Channel Advisor: Order Reimport on fail</field>
+            <field name="model_id" ref="model_transaction_log" />
+            <field name="state">code</field>
+            <field name="code">model._cron_reimport_orders()</field>
+            <field name="user_id" ref="base.user_root" />
+            <field name="interval_number">1</field>
+            <field name="interval_type">hours</field>
+            <field name="numbercall">-1</field>
+            <field name="doall" eval="False" />
+        </record>
+
     </data>
 </odoo>

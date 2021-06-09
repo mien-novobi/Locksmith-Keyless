@@ -80,6 +80,12 @@ class ChannelAdvisorConnector(models.Model):
             res = requests.get(resource_url)
             data = res.json()
 
+        elif method == "retrieve_order":
+            if kwargs.get('order_id'):
+                resource_url = self.base_url + "/v1/Orders(%s)?access_token=%s&$expand=Items($expand=Promotions),Fulfillments" % (kwargs.get('order_id'), self._access_token())
+                res = requests.get(resource_url)
+                data = res.json()
+
         elif method == "update_quantity":
             if kwargs.get('product_id') and kwargs.get('vals'):
                 header = {'Content-Type': 'application/json'}

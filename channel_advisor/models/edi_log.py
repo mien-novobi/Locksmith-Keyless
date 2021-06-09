@@ -13,10 +13,15 @@ class TransactionLogger(models.Model):
     _description = "Transaction Log Details"
     _order = 'id desc'
 
-    name = fields.Char(string='Name')
+    name = fields.Char(string="Order Reference")
     message = fields.Text(string='Error Message')
     attachment_id = fields.Many2one('ir.attachment', 'File')
     sale_id = fields.Many2one('sale.order', 'Sale Order')
+    state = fields.Selection([
+        ('new', 'New'),
+        ('done', 'Reimported'),
+    ], string="Status", default="new")
+
     def convert_date_time(self, date_str):
         try:
             date_str1 = parser.parse(date_str).strftime("%Y-%m-%d %H:%M:%S")
@@ -347,11 +352,13 @@ class TransactionLogger(models.Model):
         if connector.orders_imported_date:
             last_imported_date = connector.orders_imported_date - timedelta(minutes=60)
             date_filter = "CreatedDateUtc ge %s and CreatedDateUtc lt %s" % (last_imported_date.strftime("%Y-%m-%dT%H:%M:%SZ"), imported_date.strftime("%Y-%m-%dT%H:%M:%SZ"))
+
         res = connector.call('import_orders', filter=date_filter)
+
         center_dict = {center.res_id: center.warehouse_id.id for center in self.env['ca.distribution.center'].search([])}
         for values in res.get('value', []):
             try:
-                vals = self._get_values(values)
+                vals = self._get_values(values) or {}
                 error_message = ''
                 try:
                     SaleOrder = self.create_order(vals,center_dict)
@@ -366,15 +373,25 @@ class TransactionLogger(models.Model):
                     cr.rollback()
                     error_message = e
                     SaleOrder = False
-                    if error_message:
-                        self.create({'message': error_message,'name': "Error in Order Import"})
+                    ca_order_id = vals.get('order_no', '')
+                    if ca_order_id or error_message:
+                        self.create({
+                            'name': ca_order_id,
+                            'message': error_message,
+                            'state': 'new',
+                        })
                         cr.commit()
             except Exception as e:
                 cr.rollback()
                 error_message = e
                 if error_message:
-                    self.create({'message': error_message, 'name': "Error in Order Import"})
+                    self.create({
+                        'name': values.get('ID', ''),
+                        'message': error_message,
+                        'state': 'new',
+                    })
                     cr.commit()
+
         if res.get('@odata.nextLink') and connector:
             connector.write(
                 {'orders_import_nextlink': res.get('@odata.nextLink', '').split('$skip=')[1]})
@@ -429,6 +446,50 @@ class TransactionLogger(models.Model):
             except Exception as e:
                 cr.rollback()
 
+        return True
+
+    def _reimport(self):
+        connector = self.env['ca.connector'].sudo().search([('state', '=', 'active')], limit=1)
+        if not connector:
+            return False
+
+        cr = self.env.cr
+        SaleOrder = self.env['sale.order'].sudo()
+        dist_centers = {center.res_id: center.warehouse_id.id for center in self.env['ca.distribution.center'].search([])}
+
+        for rec in self:
+            try:
+                sale_order = SaleOrder.search([('chnl_adv_order_id', '=', rec.name),('state', 'not in', ['cancel'])], limit=1)
+                if not sale_order:
+                    res = connector.call('retrieve_order', order_id=rec.name)
+                    vals = self._get_values(res) or {}
+                    sale_order = self.create_order(vals, dist_centers)
+
+                rec.write({
+                    'sale_id': sale_order.id,
+                    'state': 'done',
+                })
+                cr.commit()
+
+                # Creating and Validating Invoice
+                if sale_order.invoice_status == 'to invoice':
+                    invoices = sale_order._create_invoices(final=True)
+                    invoices.post()
+                    cr.commit()
+            except Exception as e:
+                cr.rollback()
+                rec.message = e
+                cr.commit()
+
+    @api.model
+    def _cron_reimport_orders(self, limit=None):
+        failed_orders = self.sudo().search([('state', '=', 'new'), ('name', '!=', False)], limit=limit)
+        failed_orders._reimport()
+
+    def action_reimport(self):
+        self.ensure_one()
+        if self.state == 'new':
+            self._reimport()
         return True
 
 
