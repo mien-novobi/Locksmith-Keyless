@@ -113,10 +113,10 @@ class ProductTemplate(models.Model):
     def update_bundle_price(self):
         for product in self:
             if product.is_kit:
-                component_price = sum([item.product_id.lst_price * item.quantity for item in product.ca_bundle_product_ids])
+                # component_price = sum([item.product_id.lst_price * item.quantity for item in product.ca_bundle_product_ids])
                 component_cost = sum([item.product_id.standard_price * item.quantity for item in product.ca_bundle_product_ids])
                 product.write({
-                    'list_price': component_price,
+                    # 'list_price': component_price,
                     'standard_price': component_cost,
                 })
 
