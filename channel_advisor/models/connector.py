@@ -231,8 +231,10 @@ class ChannelAdvisorConnector(models.Model):
                 'Brand',
                 'Cost',
                 'Weight',
+                'Condition',
                 'RetailPrice',
                 'Description',
+                'Manufacturer',
                 'Classification',
                 'ParentProductID',
             ]
@@ -244,7 +246,7 @@ class ChannelAdvisorConnector(models.Model):
                         'type': 'product',
                         'name': values.get('Title') or values.get('Sku'),
                         'default_code': values.get('Sku'),
-                        'description': values.get('Description'),
+                        'description_sale': values.get('Description'),
                         'ca_product_id': values.get('ID'),
                         'ca_profile_id': values.get('ProfileID'),
                         'weight': values.get('Weight') or 0,
@@ -255,6 +257,8 @@ class ChannelAdvisorConnector(models.Model):
                         'ca_mpn': values.get('MPN') or '',
                         'ca_product_type': values.get('ProductType') or '',
                         'ca_parent_product_id': values.get('ParentProductID') or '',
+                        'ca_condition': values.get('Condition') or '',
+                        'ca_manufacturer': values.get('Manufacturer') or '',
                         'is_kit': True if values.get('ProductType') == 'Bundle' else False,
                     }
                     product = Product.search([('ca_product_id', '=', values.get('ID')), ('ca_profile_id', '=', values.get('ProfileID'))])

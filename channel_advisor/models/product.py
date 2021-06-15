@@ -58,6 +58,14 @@ class ProductTemplate(models.Model):
     kit_free_qty = fields.Float(compute="_compute_kit_available", string="Free To Use Kits", digits="Product Unit of Measure", compute_sudo=False)
     free_qty = fields.Float(compute="_compute_free_qty", string="Free To Use Quantity", digits="Product Unit of Measure", compute_sudo=False)
     is_kit = fields.Boolean(string="Kit?", default=False)
+    ca_condition = fields.Selection([
+        ('NEW', 'New'),
+        ('USED', 'Used'),
+        ('REFURBISHED', 'Refurbished'),
+        ('RECONDITIONED', 'Reconditioned'),
+        ('LIKE NEW', 'Lke New'),
+    ], string="Condition")
+    ca_manufacturer = fields.Char(string="Manufacturer")
 
     @api.depends()
     def _compute_free_qty(self):
