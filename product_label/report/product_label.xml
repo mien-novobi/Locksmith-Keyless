@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="product_label_4x6_template">
+        <t t-call="web.basic_layout">
+            <div class="page">
+                <t t-set="fcc_id" t-value="product.get_ca_attribute('FCC ID')" />
+                <t t-set="frequency" t-value="product.get_ca_attribute('Frequency')" />
+                <t t-set="battery" t-value="product.get_ca_attribute('Battery')" />
+
+                <div class="row">
+                    <div class="col-6">
+                        SKU: <span t-esc="product.default_code" />
+                    </div>
+                    <div class="col-6 text-center">
+                        <t t-if="product.default_code">
+                            <img alt="Barcode"
+                                t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s' % ('Code128', quote_plus(product.default_code or ''), 600, 150)"
+                                style="width: 100%; height: 2rem;" />
+                            <span style="font-size: 12px;" t-field="product.default_code" />
+                        </t>
+                    </div>
+                </div>
+                <br />
+                <div class="row">
+                    <div class="col-12" style="font-weight: 800; border-bottom: 1px solid #d0d0d0;">
+                        <span t-esc="product.name" />
+                    </div>
+                </div>
+                <br />
+                <div class="row">
+                    <div class="col-12" style="font-weight: 500;">
+                        Manufacturer: &amp;nbsp; <span t-esc="product.ca_manufacturer or ''" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12" style="font-weight: 500;">
+                        Condition:  &amp;nbsp; <span t-esc="product.ca_condition or ''" />
+                    </div>
+                </div>
+                <div class="row" t-if="fcc_id">
+                    <div class="col-12" style="font-weight: 500;">
+                        Fcc: &amp;nbsp; <span t-esc="fcc_id" />
+                    </div>
+                </div>
+                <div class="row" t-if="frequency">
+                    <div class="col-12" style="font-weight: 500;">
+                        Frequency: &amp;nbsp; <span t-esc="frequency" />
+                    </div>
+                </div>
+                <div class="row" t-if="battery">
+                    <div class="col-12" style="font-weight: 500;">
+                        Battery: &amp;nbsp; <span t-esc="battery" />
+                    </div>
+                </div>
+                <br />
+                <div class="row">
+                    <div class="col-12" style="font-weight: 500;">
+                        <t t-raw="product.description" />
+                    </div>
+                </div>
+                <div class="row footer">
+                    <div class="col-8" style="padding-top: 85px;">
+                        <span style="font-size: 14px;">WWW.LOCKSMITHKEYLESS.COM</span>
+                    </div>
+                    <div class="col-4">
+                        <img alt="Barcode"
+                            src="/report/barcode/?type=QR&amp;value=www.locksmithkeyless.com&amp;width=128&amp;height=128&amp;humanreadable=1"
+                            style="width:100%;" />
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+
+    <template id="report_product_tmpl_label_4x6">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="product">
+                <t t-call="product_label.product_label_4x6_template" />
+            </t>
+        </t>
+    </template>
+
+
+    <template id="report_product_label_4x6">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="product">
+                <t t-call="product_label.product_label_4x6_template" />
+            </t>
+        </t>
+    </template>
+
+
+    <record id="product_label_paperformat" model="report.paperformat">
+        <field name="name">Product Label (4x6)</field>
+        <field name="default" eval="False" />
+        <field name="format">custom</field>
+        <field name="orientation">Portrait</field>
+        <field name="page_height">152</field>
+        <field name="page_width">101</field>
+        <field name="margin_top">5</field>
+        <field name="margin_bottom">30</field>
+        <field name="margin_left">5</field>
+        <field name="margin_right">5</field>
+        <field name="header_line" eval="False" />
+        <field name="dpi">90</field>
+        <field name="header_spacing">0</field>
+    </record>
+
+
+    <record id="product_tmpl_label_report_4x6" model="ir.actions.report">
+        <field name="name">Product Label (4x6)</field>
+        <field name="model">product.template</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">product_label.report_product_tmpl_label_4x6</field>
+        <field name="report_file">product_label.report_product_tmpl_label_4x6</field>
+        <field name="print_report_name">'Products Labels - %s' % (object.name)</field>
+        <field name="paperformat_id" ref="product_label_paperformat" />
+        <field name="binding_model_id" ref="product.model_product_template" />
+        <field name="binding_type">report</field>
+    </record>
+
+    <record id="product_label_report_4x6" model="ir.actions.report">
+        <field name="name">Product Label (4x6)</field>
+        <field name="model">product.product</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">product_label.report_product_label_4x6</field>
+        <field name="report_file">product_label.report_product_label_4x6</field>
+        <field name="print_report_name">'Products Labels - %s' % (object.name)</field>
+        <field name="paperformat_id" ref="product_label_paperformat" />
+        <field name="binding_model_id" ref="product.model_product_product" />
+        <field name="binding_type">report</field>
+    </record>
+
+
+</odoo>
