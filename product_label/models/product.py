@@ -13,7 +13,8 @@ class ProductTemplate(models.Model):
         value = ''
         if attrib and self.description_sale:
             cleaner = re.compile('<.*?>')
-            attributes = self.description_sale.split('<br>')
+            description = self.description_sale.replace('<br />', '<br>')
+            attributes = description.split('<br>')
             vals = [attribute.split(':')[-1] for attribute in attributes if re.search(attrib, attribute, re.IGNORECASE)]
             value = vals and cleaner.sub('', vals[0].strip()) or ''
         return value
@@ -27,7 +28,8 @@ class ProductProduct(models.Model):
         value = ''
         if attrib and self.description_sale:
             cleaner = re.compile('<.*?>')
-            attributes = self.description_sale.split('<br>')
+            description = self.description_sale.replace('<br />', '<br>')
+            attributes = description.split('<br>')
             vals = [attribute.split(':')[-1] for attribute in attributes if re.search(attrib, attribute, re.IGNORECASE)]
             value = vals and cleaner.sub('', vals[0].strip()) or ''
         return value
