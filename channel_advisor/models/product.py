@@ -154,6 +154,11 @@ class ProductTemplate(models.Model):
 class ProductProduct(models.Model):
     _inherit = 'product.product'
 
+    def get_product_multiline_description_sale(self):
+        # name = super(ProductProduct, self).get_product_multiline_description_sale()
+        name = self.display_name
+        return name
+
     def action_update_components(self):
         self.ensure_one()
         return self.product_tmpl_id.action_update_components()
