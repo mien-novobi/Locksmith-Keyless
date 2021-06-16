@@ -9,6 +9,7 @@ class PosConfig(models.Model):
     auto_invoice = fields.Boolean(string="Auto Invoicing", default=True)
     sms_notify = fields.Boolean(string="Send SMS Notification?", default=False)
     sms_template_id = fields.Many2one('sms.template', string="SMS Template")
+    auto_sms_notify = fields.Boolean(string="Auto Send SMS", default=False)
 
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

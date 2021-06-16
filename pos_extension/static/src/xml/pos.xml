@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <t t-extend="PaymentScreenWidget">
+        <t t-jquery="div.js_email" t-operation="after">
+            <t t-if='widget.pos.config.sms_notify'>
+                <t t-if='widget.pos.get_order()'>
+                    <div t-attf-class='button js_sms #{widget.pos.get_order().to_sms ? "highlight" : ""}'>
+                        <i class='fa fa-envelope-o' /> SMS
+                    </div>
+                </t>
+            </t>
+        </t>
+    </t>
+
+</templates>

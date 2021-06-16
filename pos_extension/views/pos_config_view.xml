@@ -38,6 +38,15 @@
                             </div>
                         </div>
                     </div>
+                    <div class="col-12 col-lg-6 o_setting_box" attrs="{'invisible': [('sms_notify', '=', False)]}">
+                        <div class="o_setting_left_pane">
+                            <field name="auto_sms_notify" />
+                        </div>
+                        <div class="o_setting_right_pane">
+                            <label for="auto_sms_notify" string="Auto Send SMS?" />
+                            <div class="text-muted"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </field>
