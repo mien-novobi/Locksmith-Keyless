@@ -29,6 +29,7 @@
                 <th name="th_sm_product"><strong>Description</strong></th>
                 <th>Image</th>
                 <th name="th_sm_quantity"><strong>Quantity</strong></th>
+                <th name="th_sm_quantity"><strong>Quantity Available</strong></th>
             </tr>
 
         </xpath>
@@ -50,6 +51,10 @@
                     <span t-field="move.product_uom_qty"/>
                     <span t-field="move.product_uom"/>
                 </td>
+                <td>
+                    <span t-field="move.product_id.qty_available"/>
+                    <span t-field="move.product_uom"/>
+                </td>
             </tr>
 
         </xpath>
@@ -60,6 +65,7 @@
                 <th name="th_sm_product"><strong>Description</strong></th>
                 <th>Image</th>
                 <th name="th_sm_quantity"><strong>Quantity</strong></th>
+                <th name="th_sm_quantity"><strong>Quantity Available</strong></th>
             </tr>
 
         </xpath>
@@ -80,6 +86,10 @@
                 </td>
                 <td class="text-center">
                     <span t-field="move.product_uom_qty"/>
+                    <span t-field="move.product_uom"/>
+                </td>
+                <td class="text-center">
+                    <span t-field="move.product_id.qty_available"/>
                     <span t-field="move.product_uom"/>
                 </td>
             </tr>
@@ -204,4 +214,3 @@
     </template>
 
 </odoo>
-                
