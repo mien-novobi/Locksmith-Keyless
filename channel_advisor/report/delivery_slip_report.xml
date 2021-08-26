@@ -29,7 +29,6 @@
                 <th name="th_sm_product"><strong>Description</strong></th>
                 <th>Image</th>
                 <th name="th_sm_quantity"><strong>Quantity</strong></th>
-                <th name="th_sm_quantity"><strong>Quantity Available</strong></th>
             </tr>
 
         </xpath>
@@ -51,10 +50,6 @@
                     <span t-field="move.product_uom_qty"/>
                     <span t-field="move.product_uom"/>
                 </td>
-                <td>
-                    <span t-field="move.product_id.qty_available"/>
-                    <span t-field="move.product_uom"/>
-                </td>
             </tr>
 
         </xpath>
@@ -65,7 +60,6 @@
                 <th name="th_sm_product"><strong>Description</strong></th>
                 <th>Image</th>
                 <th name="th_sm_quantity"><strong>Quantity</strong></th>
-                <th name="th_sm_quantity"><strong>Quantity Available</strong></th>
             </tr>
 
         </xpath>
@@ -86,10 +80,6 @@
                 </td>
                 <td class="text-center">
                     <span t-field="move.product_uom_qty"/>
-                    <span t-field="move.product_uom"/>
-                </td>
-                <td class="text-center">
-                    <span t-field="move.product_id.qty_available"/>
                     <span t-field="move.product_uom"/>
                 </td>
             </tr>
@@ -137,9 +127,8 @@
                     <strong>Description</strong>
                 </th>
                 <th>Image</th>
-                <th>
-                    <strong>Quantity</strong>
-                </th>
+                <th>Quantity</th>
+                <th>Quantity Available</th>
                 <th name="th_from" t-if="o.picking_type_id.code != 'incoming'" align="left" groups="stock.group_stock_multi_locations">
                     <strong>From</strong>
                 </th>
@@ -174,8 +163,10 @@
                             <td>
                                 <span t-if="o.state != 'done'" t-field="ml.product_uom_qty"/>
                                 <span t-if="o.state == 'done'" t-field="ml.qty_done"/>
+                            </td>
+                            <td class="text-center">
+                                <span t-field="ml.product_id.qty_available"/>
                                 <span t-field="ml.product_uom_id" groups="uom.group_uom"/>
-
                             </td>
                             <td t-if="o.picking_type_id.code != 'incoming'" groups="stock.group_stock_multi_locations">
                                 <span t-esc="ml.location_id.display_name"/>
