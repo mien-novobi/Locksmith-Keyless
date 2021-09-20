@@ -99,20 +99,25 @@ class ProductTemplate(models.Model):
                 product.ca_parent_id = False
 
     def action_update_components(self):
-        self.ensure_one()
         Product = self.env['product.product']
-        connector = self.env['ca.connector'].sudo().search([('ca_account_ids.account_id', '=', self.ca_profile_id)], limit=1)
-        if connector:
-            res = connector.call('retrieve_bundle_components', bundle_id=self.ca_product_id)
-            components = [(5, 0, 0)]
-            for vals in res.get('value', []):
-                product = Product.search([('ca_product_id', '=', vals.get('ComponentID')), ('ca_profile_id', '=', vals.get('ProfileID'))], limit=1)
-                if product:
-                    components.append((0, 0, {
-                        'product_id': product.id,
-                        'quantity': vals.get('Quantity', 0),
-                    }))
-            self.write({'ca_bundle_product_ids': components})
+        connector = False
+        profile_ids = []
+        for rec in self.filtered(lambda r: r.ca_product_type == 'Bundle'):
+            if rec.ca_profile_id not in profile_ids or not connector:
+                connector = self.env['ca.connector'].sudo().search([('ca_account_ids.account_id', '=', rec.ca_profile_id)], limit=1)
+                profile_ids = connector.ca_account_ids.mapped('account_id')
+
+            if connector:
+                res = connector.call('retrieve_bundle_components', bundle_id=rec.ca_product_id)
+                components = [(5, 0, 0)]
+                for vals in res.get('value', []):
+                    product = Product.search([('ca_product_id', '=', vals.get('ComponentID')), ('ca_profile_id', '=', vals.get('ProfileID'))], limit=1)
+                    if product:
+                        components.append((0, 0, {
+                            'product_id': product.id,
+                            'quantity': vals.get('Quantity', 0),
+                        }))
+                rec.write({'ca_bundle_product_ids': components})
         return True
 
     def ca_update_quantity(self):

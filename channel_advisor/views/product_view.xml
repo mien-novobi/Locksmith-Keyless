@@ -213,6 +213,7 @@
             parent="stock.menu_stock_inventory_control" sequence="50" />
 
 
+        <!-- ACTION MULTI -->
         <record id="ca_update_quantity_action" model="ir.actions.server">
             <field name="name">ChannelAdvisor: Update Quantity</field>
             <field name="model_id" ref="product.model_product_template" />
@@ -220,6 +221,15 @@
             <field name="binding_view_types">form,list</field>
             <field name="state">code</field>
             <field name="code">records.ca_update_quantity()</field>
+        </record>
+
+        <record id="ca_update_kit_action" model="ir.actions.server">
+            <field name="name">ChannelAdvisor: Update Kit</field>
+            <field name="model_id" ref="product.model_product_template" />
+            <field name="binding_model_id" ref="product.model_product_template" />
+            <field name="binding_view_types">form,list</field>
+            <field name="state">code</field>
+            <field name="code">records.action_update_components()</field>
         </record>
 
     </data>
