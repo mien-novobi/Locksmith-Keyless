@@ -36,6 +36,7 @@ class ChannelAdvisorConnector(models.Model):
     orders_item_import_nextlink = fields.Char(string="Items Import NextLink")
     auto_update_price = fields.Boolean(string="Auto Update Price?", default=False)
     auto_update_cost = fields.Boolean(string="Auto Update Cost?", default=False)
+    default_journal_id = fields.Many2one('account.journal', string="Default Payment Journal")
 
     @api.depends('application_id', 'shared_secret')
     def _compute_client_id(self):

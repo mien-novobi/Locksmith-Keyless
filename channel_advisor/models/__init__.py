@@ -13,5 +13,6 @@ from . import purchase
 from . import procurement
 from . import update_queue
 from . import stock_move
+from . import invoice
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

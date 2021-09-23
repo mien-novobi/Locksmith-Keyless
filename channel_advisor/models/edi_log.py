@@ -337,7 +337,6 @@ class TransactionLogger(models.Model):
 
         return saleorder
 
-
     def _import_orders(self):
         cr = self.env.cr
         imported_date = datetime.now() - timedelta(minutes=10)
@@ -367,7 +366,7 @@ class TransactionLogger(models.Model):
                     # Creating and Validating Invoice
                     if SaleOrder.invoice_status == 'to invoice':
                         invoices = SaleOrder._create_invoices(final=True)
-                        invoices.post()
+                        invoices.pay_and_reconcile(connector.default_journal_id)
                         cr.commit()
                 except Exception as e:
                     cr.rollback()
@@ -440,7 +439,7 @@ class TransactionLogger(models.Model):
 
                     if order.invoice_status == 'to invoice':
                         invoices = order._create_invoices(final=True)
-                        invoices.post()
+                        invoices.pay_and_reconcile(connector.default_journal_id)
                         cr.commit()
 
             except Exception as e:
@@ -474,7 +473,7 @@ class TransactionLogger(models.Model):
                 # Creating and Validating Invoice
                 if sale_order.invoice_status == 'to invoice':
                     invoices = sale_order._create_invoices(final=True)
-                    invoices.post()
+                    invoices.pay_and_reconcile(connector.default_journal_id)
                     cr.commit()
             except Exception as e:
                 cr.rollback()

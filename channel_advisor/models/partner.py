@@ -10,6 +10,7 @@ class Partner(models.Model):
     edi_partner = fields.Boolean(string= "CA Customer")
     ca_site_id = fields.Integer(string='CA Site ID')
     commission = fields.Float(string='Commission %', default=0.0)
+    ca_journal_id = fields.Many2one('account.journal', string="Payment Journal")
 
     # edi_order  = fields.Boolean(string="Enable 850")
     # edi_ack = fields.Boolean(string="Enable 855 ")
