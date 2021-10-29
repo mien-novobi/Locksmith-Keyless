@@ -339,7 +339,7 @@ class TransactionLogger(models.Model):
 
     def _import_orders(self):
         cr = self.env.cr
-        imported_date = datetime.now() - timedelta(minutes=10)
+        imported_date = datetime.now() - timedelta(minutes=30)
         if self.env.context.get('from_cron'):
             connector = self.env['ca.connector'].search([('state', '=', 'active'), ('auto_import_orders', '=', True)], limit=1)
         else:
@@ -394,8 +394,7 @@ class TransactionLogger(models.Model):
         if res.get('@odata.nextLink') and connector:
             connector.write(
                 {'orders_import_nextlink': res.get('@odata.nextLink', '').split('$skip=')[1]})
-
-            # self._import_orders()
+            self._import_orders()
         else:
             connector.write({
                 'orders_import_nextlink': '',
