@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import json
+import threading
 
-from odoo import api, fields, models, _
+from odoo import api, fields, models, registry, _
 
 
 class StockPicking(models.Model):
@@ -237,7 +238,14 @@ class StockPicking(models.Model):
                     data['orderId'] = shipping_order.order_id
                     shipstation_account = shipping_order.account_id
             if shipstation_account and data:
-                res = shipstation_account._send_request('orders/restorefromhold', data, method="POST")
+                # res = shipstation_account._send_request('orders/restorefromhold', data, method="POST")
+                new_cr = registry(self.env.cr.dbname).cursor()
+                with api.Environment.manage():
+                    new_env = api.Environment(new_cr, self.env.uid, self.env.context)
+                    shipstation_account = shipstation_account.with_env(new_env)
+                    thread = threading.Thread(target=shipstation_account._send_request, args=('orders/restorefromhold', data, 'POST'))
+                    thread.daemon = True
+                    thread.start()
         return True
 
     def action_done(self):
