@@ -377,6 +377,7 @@ class ChannelAdvisorConnector(models.Model):
                 'product_id': product.id,
             })
 
+        UpdateQueue._cron_process_update_queue()
         return True
 
 

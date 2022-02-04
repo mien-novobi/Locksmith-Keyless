@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 
+import logging
 from datetime import datetime
 
 from odoo import api, fields, models
+
+
+_logger = logging.getLogger(__name__)
 
 
 class UpdateQueue(models.Model):
@@ -74,6 +78,7 @@ class UpdateQueue(models.Model):
                     queue_items.unlink()
                     cr.commit()
                 except Exception as e:
+                    _logger.warning(str(e))
                     cr.rollback()
         return True
 
