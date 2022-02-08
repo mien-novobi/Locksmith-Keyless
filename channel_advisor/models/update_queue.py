@@ -35,7 +35,7 @@ class UpdateQueue(models.Model):
         cr = self.env.cr
 
         queue_size = self.search_count([('update_type', '=', 'quantity')])
-        dist_centers = self.env['ca.distribution.center'].search([('type', '=', 'Warehouse'), ('warehouse_id', '!=', False)])
+        dist_centers = self.env['ca.distribution.center'].search([('warehouse_id', '!=', False)])
 
         if not queue_size or not dist_centers:
             return False
