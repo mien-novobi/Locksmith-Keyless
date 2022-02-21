@@ -244,7 +244,6 @@ class ChannelAdvisorConnector(models.Model):
             for values in res.get('value', []):
                 try:
                     vals = {
-                        'type': 'product',
                         'name': values.get('Title') or values.get('Sku'),
                         'default_code': values.get('Sku'),
                         'description_sale': values.get('Description'),
@@ -275,6 +274,7 @@ class ChannelAdvisorConnector(models.Model):
                     if product:
                         product.with_context(ca_import=True).write(vals)
                     else:
+                        vals['type'] = 'product'
                         Product.with_context(ca_import=True).create(vals)
                     cr.commit()
                 except Exception as e:
