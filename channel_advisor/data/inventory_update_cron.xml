@@ -34,8 +34,8 @@
         <field name="state">code</field>
         <field name="code">model._cron_process_update_queue(batch_size=80)</field>
         <field name="user_id" ref="base.user_root" />
-        <field name="interval_number">1</field>
-        <field name="interval_type">days</field>
+        <field name="interval_number">4</field>
+        <field name="interval_type">hours</field>
         <field name="numbercall">-1</field>
         <field name="doall" eval="False" />
     </record>
