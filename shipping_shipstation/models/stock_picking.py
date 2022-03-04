@@ -143,7 +143,10 @@ class StockPicking(models.Model):
                         "phone": picking.partner_id.phone,
                     },
                     "items": item_list,
-                    "advancedOptions" : {"storeId" : picking.shipstation_store_id.store_id},
+                    "advancedOptions" : {
+                        "storeId": picking.shipstation_store_id.store_id,
+                        'source': 'Odoo Sales',
+                    },
                 }
 
                 if picking.backorder_id and picking.backorder_id.shipstation_order_id:
