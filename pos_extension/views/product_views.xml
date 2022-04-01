@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ACTION MULTI -->
+    <record id="product_tmpl_available_in_pos_action_multi" model="ir.actions.server">
+        <field name="name">Available in POS</field>
+        <field name="model_id" ref="product.model_product_template" />
+        <field name="binding_model_id" ref="product.model_product_template" />
+        <field name="binding_view_types">form,list</field>
+        <field name="state">code</field>
+        <field name="code">records.write({'available_in_pos': True})</field>
+    </record>
+
+    <record id="product_available_in_pos_action_multi" model="ir.actions.server">
+        <field name="name">Available in POS</field>
+        <field name="model_id" ref="product.model_product_product" />
+        <field name="binding_model_id" ref="product.model_product_product" />
+        <field name="binding_view_types">form,list</field>
+        <field name="state">code</field>
+        <field name="code">records.write({'available_in_pos': True})</field>
+    </record>
+
+</odoo>

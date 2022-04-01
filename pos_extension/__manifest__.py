@@ -26,6 +26,7 @@
 
         'views/assets.xml',
         'views/pos_config_view.xml',
+        'views/product_views.xml',
     ],
     'qweb': ['static/src/xml/pos.xml'],
     'installable': True,
