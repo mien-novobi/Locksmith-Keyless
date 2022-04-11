@@ -72,6 +72,7 @@ class TransactionLogger(models.Model):
             ship_info.update({
                 'PhoneNumberDay': node.get('ShippingDaytimePhone', '',),
             })
+        ship_info['BuyerEmailAddress'] =  node.get('BuyerEmailAddress', '')
         res.update({'order_no': node.get('ID', ''),
                     'ProfileID': node.get('ProfileID', ''),
                     'SiteName': node.get('SiteName', ''),
@@ -132,43 +133,60 @@ class TransactionLogger(models.Model):
         :param address_type: string 'delivery' or 'invoice'
         :return: Partner Address recordset
         """
-
+        name = address.get('FirstName', '') + address.get('LastName', '')
+        email = address.get('BuyerEmailAddress', '')
         street  = address.get('address1', '')
-        street1  = address.get('address2', '')
+        street2  = address.get('address2', '')
         state = address.get('RegionDescription', '')
         city = address.get('City', '')
         zip_code = address.get('PostalCode', '')
         phone = address.get('PhoneNumberDay', '')
-        domain = [('type', '=', address_type), ('parent_id', '=', customer.id), ('active', '=', True), ('city', '=ilike', city),
-                  ('zip', '=', zip_code), ]
-        if street:
-            domain.append(('street', '=ilike', street))
-        if street1:
-            domain.append(('street2', '=ilike', street1))
-        if phone:
-            domain.append(('phone', '=', phone))
+        domain = [('active', '=', True)]
+
+        if email:
+            domain += [('email', '=', email)]
+        elif phone:
+            domain += [('phone', '=', phone)]
+        else:
+            domain += [('name', 'ilike', name)]
+            if city:
+                domain.append(('city', '=ilike', city))
+            if street:
+                domain.append(('street', '=ilike', street))
+            if street2:
+                domain.append(('street2', '=ilike', street2))
+            if zip_code:
+                domain.append(('zip', '=', zip_code))
+
         del_addr = self.env['res.partner'].search(domain, limit=1)
-        State = False
-        Country = False
-        if not del_addr:
+        if del_addr:
+            del_addr.write({
+                'parent_id': False,
+                'type': 'contact',
+                'company_type': 'person',
+            })
+        else:
+            State = False
+            Country = False
             if  address.get('CountryCode', ''):
                 Country = self.env['res.country'].search([('code', '=', address.get('CountryCode', ''))])
                 if Country:
                     State = self.env['res.country.state'].search(
                         [('name', '=', address.get('RegionDescription', '')), ('country_id', '=', Country.id)])
 
-
             vals = {
                 'name':  address.get('FirstName', '') +  '' + address.get('LastName', '') or '',
-                'phone': address.get('PhoneNumberDay', '') or '',
-                'street': street or '',
-                'street2': street1 or '',
-                'zip': address.get('PostalCode', '') ,
-                'city': address.get('City', '') or '',
+                'email': email,
+                'phone': phone,
+                'street': street,
+                'street2': street2,
+                'zip': zip_code,
+                'city': city,
                 'state_id': State and State.id or False,
                 'country_id': Country and Country.id or False,
-                'type': address_type,
-                'parent_id': customer.id
+                'type': 'contact',
+                'company_type': 'person',
+                # 'parent_id': customer.id
             }
 
             del_addr = customer.create(vals)
@@ -492,3 +510,4 @@ class TransactionLogger(models.Model):
 
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
+
