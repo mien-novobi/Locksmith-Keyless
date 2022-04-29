@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <menuitem id="purchasing_report_menu" name="Purchasing Report" action="purchasing_report_filter_action"
+        parent="purchase.purchase_report" sequence="10" groups="purchase.group_purchase_manager" />
+
+</odoo>

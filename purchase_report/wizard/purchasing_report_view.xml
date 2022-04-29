@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="purchasing_report_filter_view_form" model="ir.ui.view">
+        <field name="name">purchasing.report.filter.form</field>
+        <field name="model">purchasing.report.filter</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="categ_id" />
+                        </group>
+                    </group>
+                </sheet>
+                <footer>
+                    <button name="action_export" type="object" string="Export" class="oe_highlight" />
+                </footer>
+            </form>
+        </field>
+    </record>
+
+
+    <record id="purchasing_report_filter_action" model="ir.actions.act_window">
+        <field name="name">Purchasing Report</field>
+        <field name="res_model">purchasing.report.filter</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="purchasing_report_filter_view_form" />
+        <field name="target">new</field>
+    </record>
+
+</odoo>
