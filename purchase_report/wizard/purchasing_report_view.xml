@@ -9,12 +9,17 @@
                 <sheet>
                     <group>
                         <group>
-                            <field name="categ_id" />
+                            <field name="categ_id" domain="[('name', '!=', 'All')]" />
+                        </group>
+                        <group>
+                            <field name="partner_id" domain="[('supplier_rank', '&gt;', 0)]" />
+                            <field name="include_child" string="Show Parent + Child Sku" />
                         </group>
                     </group>
                 </sheet>
                 <footer>
                     <button name="action_export" type="object" string="Export" class="oe_highlight" />
+                    <button string="Cancel" class="oe_highlight" special="cancel" />
                 </footer>
             </form>
         </field>

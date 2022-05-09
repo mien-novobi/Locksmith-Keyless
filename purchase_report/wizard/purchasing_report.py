@@ -8,11 +8,13 @@ class PurchasingReportFilter(models.TransientModel):
     _description = "Purchasing Report Filter"
 
     categ_id = fields.Many2one('product.category', string="Category")
+    partner_id = fields.Many2one('res.partner', string="Vendors")
+    include_child = fields.Boolean(default=False)
 
     def action_export(self):
         return {
             'type' : 'ir.actions.act_url',
-            'url': '/web/purchase/report/export?category=%s' % self.categ_id.id,
+            'url': '/web/purchase/report/export/%s' % self.id,
             'target': 'new',
         }
 

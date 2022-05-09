@@ -10,13 +10,17 @@ from odoo.http import request
 
 class PurchaseReportExport(http.Controller):
 
-    @http.route('/web/purchase/report/export', type="http", auth="user")
-    def export_purchasing_report(self, **kargs):
+    @http.route('/web/purchase/report/export/<int:id>', type="http", auth="user")
+    def export_purchasing_report(self, id=None, **kargs):
+        report_filter = request.env['purchasing.report.filter'].sudo().browse(id)
+
         csv_file = io.StringIO()
         writer = csv.writer(csv_file)
 
-        headers = ['Internal Reference', 'Name', 'Cost', 'Sales Price', 'MARK-UP', 'Quantity On Hand', 'Quantity Back Ordered', 'Quantity on order', 'Monthly Avg Sales', 'MIN QUANTITY', 'MAX QUANTITY', 'Dropship (False/True)', 'Product Category', 'Vendor']
+        headers = ['Internal Reference', 'Name', 'Cost', 'Sales Price', 'MARK-UP', 'Quantity On Hand', 'Quantity Back Ordered', 'Quantity on order', 'Monthly Avg Sales', 'MIN QUANTITY', 'MAX QUANTITY', 'TOTAL UNITS SOLD', 'TOTAL $ SOLD', 'Dropship (False/True)', 'Product Category', 'Vendor']
 
+        SaleOrderLine = request.env['sale.order.line'].sudo()
+        PurchaseOrder = request.env['purchase.order'].sudo()
         today = date.today()
         from_date = today - relativedelta(months=12, day=1)
         date_start = from_date
@@ -29,23 +33,26 @@ class PurchaseReportExport(http.Controller):
 
         writer.writerow(headers)
 
-        products = request.env['product.product'].sudo().search([
-            ('type', '=', 'product'),
-            ('purchase_ok', '=', True),
-            ('categ_id', '=?', int(kargs.get('category', False))),
-        ])
-        SaleOrderLine = request.env['sale.order.line'].sudo()
-        PurchaseOrderLine = request.env['purchase.order.line'].sudo()
+        domain = [('type', '=', 'product'), ('purchase_ok', '=', True)]
+        if report_filter.categ_id:
+            domain += [('categ_id', '=', report_filter.categ_id.id)]
+
+        if report_filter.partner_id:
+            product_ids = PurchaseOrder.search([('partner_id', '=', report_filter.partner_id.id), ('state', 'in', ['purchase', 'done'])]).mapped('order_line.product_id').ids
+            domain += [('id', 'in', product_ids)]
+
+        if report_filter.include_child:
+            domain += [('ca_product_type', 'in', ['Item', 'Parent', 'Child'])]
+        else:
+            domain += [('ca_product_type', 'in', ['Item', 'Parent'])]
+
+
+        products = request.env['product.product'].sudo().search(domain)
+
 
         for product in products:
             product_available = product._product_available().get(product.id, {})
-            product_sales = SaleOrderLine.search([
-                ('product_id', '=', product.id),
-                ('order_id.state', 'in', ['sale', 'done']),
-                ('order_id.date_order', '>=', from_date.strftime('%Y-%m-%d')),
-                ('order_id.date_order', '<=', today.strftime('%Y-%m-%d')),
-            ])
-            sales_avg = sum(product_sales.mapped('product_uom_qty')) / 12
+
             vals = [
                 product.default_code or '',
                 product.display_name,
@@ -55,7 +62,9 @@ class PurchaseReportExport(http.Controller):
                 product_available.get('qty_available', 0),
                 0,
                 product_available.get('incoming_qty', 0),
-                sales_avg,
+                0,
+                '',
+                '',
                 '',
                 '',
                 bool(product.route_ids.filtered(lambda r: r.name == 'Dropship')),
@@ -63,16 +72,26 @@ class PurchaseReportExport(http.Controller):
                 product.seller_ids[:1].name.name or '',
             ]
 
+            sales_data = []
+            sales_total = 0
             for i, domain_date in enumerate(domain_dates):
-                product_purchases = PurchaseOrderLine.search([
+                product_sales = SaleOrderLine.search([
                     ('product_id', '=', product.id),
-                    ('order_id.state', 'in', ['purchase', 'done']),
-                    ('order_id.date_approve', '>=', domain_date[0].strftime('%Y-%m-%d')),
-                    ('order_id.date_approve', '<', domain_date[1].strftime('%Y-%m-%d')),
+                    ('order_id.state', 'in', ['sale', 'done']),
+                    ('order_id.date_order', '>=', domain_date[0].strftime('%Y-%m-%d')),
+                    ('order_id.date_order', '<', domain_date[1].strftime('%Y-%m-%d')),
                 ])
-                purchase_sum = sum(product_purchases.mapped('product_qty'))
-                vals.insert(9 + i, purchase_sum)
+                sales_total += sum(product_sales.mapped('price_subtotal'))
+                sales_sum = sum(product_sales.mapped('product_uom_qty'))
+                sales_data.append(sales_sum)
+                vals.insert(9 + i, sales_sum)
 
+            sales_qty_total = sum(sales_data)
+            vals[8] = sales_qty_total / 12
+            vals[22] = min(sales_data)
+            vals[23] = max(sales_data)
+            vals[24] = sales_qty_total
+            vals[25] = sales_total
             writer.writerow(vals)
 
         response = request.make_response(

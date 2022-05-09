@@ -16,7 +16,7 @@
     """,
     'author': 'Confianz IT',
     'website': 'https://www.confianzit.com',
-    'depends':  ['purchase'],
+    'depends':  ['purchase', 'channel_advisor'],
     'data': [
         'wizard/purchasing_report_view.xml',
         'views/purchase_views.xml',
