@@ -52,13 +52,13 @@ class PurchaseReportExport(http.Controller):
 
         for product in products:
             product_available = product._product_available().get(product.id, {})
-
+            margin = (1 - (product.standard_price / product.lst_price)) if product.lst_price else 0
             vals = [
                 product.default_code or '',
                 product.display_name,
                 product.standard_price,
                 product.lst_price,
-                '',
+                margin,
                 product_available.get('qty_available', 0),
                 0,
                 product_available.get('incoming_qty', 0),
@@ -88,8 +88,8 @@ class PurchaseReportExport(http.Controller):
 
             sales_qty_total = sum(sales_data)
             vals[8] = sales_qty_total / 12
-            vals[22] = min(sales_data)
-            vals[23] = max(sales_data)
+            vals[22] = product.reordering_min_qty
+            vals[23] = product.reordering_max_qty
             vals[24] = sales_qty_total
             vals[25] = sales_total
             writer.writerow(vals)
