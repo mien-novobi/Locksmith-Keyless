@@ -19,17 +19,15 @@ class PurchaseReportExport(http.Controller):
 
         headers = ['Internal Reference', 'Name', 'Cost', 'Sales Price', 'MARK-UP', 'Quantity On Hand', 'Quantity Back Ordered', 'Quantity on order', 'Monthly Avg Sales', 'MIN QUANTITY', 'MAX QUANTITY', 'TOTAL UNITS SOLD', 'TOTAL $ SOLD', 'Dropship (False/True)', 'Product Category', 'Vendor']
 
-        SaleOrderLine = request.env['sale.order.line'].sudo()
+        SaleReport = request.env['sale.report'].sudo()
         PurchaseOrder = request.env['purchase.order'].sudo()
         today = date.today()
         from_date = today - relativedelta(months=12, day=1)
-        date_start = from_date
-        domain_dates = []
-        for i in range(1, 14):
-            headers.insert(8 + i, date_start.strftime('%b-%y'))
-            date_end = from_date + relativedelta(months=i)
-            domain_dates += [(date_start, date_end)]
-            date_start = date_end
+        domain_dates = {}
+        for i in range(0, 13):
+            date_start = from_date + relativedelta(months=i)
+            headers.insert(9 + i, date_start.strftime('%b-%y'))
+            domain_dates[date_start.strftime('%B %Y')] = 9 + i
 
         writer.writerow(headers)
 
@@ -46,9 +44,7 @@ class PurchaseReportExport(http.Controller):
         else:
             domain += [('ca_product_type', 'in', ['Item', 'Parent'])]
 
-
         products = request.env['product.product'].sudo().search(domain)
-
 
         for product in products:
             product_available = product._product_available().get(product.id, {})
@@ -63,31 +59,45 @@ class PurchaseReportExport(http.Controller):
                 0,
                 product_available.get('incoming_qty', 0),
                 0,
-                '',
-                '',
-                '',
-                '',
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
                 bool(product.route_ids.filtered(lambda r: r.name == 'Dropship')),
                 product.categ_id.name,
                 product.seller_ids[:1].name.name or '',
             ]
 
-            sales_data = []
+            product_sales = SaleReport.read_group([
+                ('product_id', '=', product.id),
+                ('state', 'in', ['sale', 'done']),
+                ('date', '>=', from_date.strftime('%Y-%m-%d')),
+                ('date', '<=', today.strftime('%Y-%m-%d')),
+            ], ['date', 'price_subtotal', 'product_uom_qty'],
+            groupby=['date:month'],
+            orderby='date ASC', lazy=True)
             sales_total = 0
-            for i, domain_date in enumerate(domain_dates):
-                product_sales = SaleOrderLine.search([
-                    ('product_id', '=', product.id),
-                    ('order_id.state', 'in', ['sale', 'done']),
-                    ('order_id.date_order', '>=', domain_date[0].strftime('%Y-%m-%d')),
-                    ('order_id.date_order', '<', domain_date[1].strftime('%Y-%m-%d')),
-                ])
-                sales_total += sum(product_sales.mapped('price_subtotal'))
-                sales_sum = sum(product_sales.mapped('product_uom_qty'))
-                sales_data.append(sales_sum)
-                vals.insert(9 + i, sales_sum)
+            sales_qty_total = 0
+            for rec in product_sales:
+                sales_total += rec.get('price_subtotal', 0.0)
+                sales_qty = rec.get('product_uom_qty', 0.0)
+                sales_qty_total += sales_qty
+                vals[domain_dates.get(rec['date:month'])] = sales_qty
 
-            sales_qty_total = sum(sales_data)
-            vals[8] = sales_qty_total / 12
+            vals[8] = sales_qty_total / 13
             vals[22] = product.reordering_min_qty
             vals[23] = product.reordering_max_qty
             vals[24] = sales_qty_total
