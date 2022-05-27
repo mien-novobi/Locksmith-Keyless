@@ -14,10 +14,7 @@ class PurchaseReportExport(http.Controller):
     def export_purchasing_report(self, id=None, **kargs):
         report_filter = request.env['purchasing.report.filter'].sudo().browse(id)
 
-        csv_file = io.StringIO()
-        writer = csv.writer(csv_file)
-
-        headers = ['Internal Reference', 'Name', 'Cost', 'Sales Price', 'MARK-UP', 'Quantity On Hand', 'Quantity Back Ordered', 'Quantity on order', 'Monthly Avg Sales', 'MIN QUANTITY', 'MAX QUANTITY', 'TOTAL UNITS SOLD', 'TOTAL $ SOLD', 'Dropship (False/True)', 'Product Category', 'Vendor']
+        headers = ['Internal Reference', 'Name', 'Cost', 'Sales Price', 'MARK-UP', 'Quantity On Hand', 'ABC classification', 'Quantity on order', 'Monthly Avg Sales', 'MIN QUANTITY', 'MAX QUANTITY', 'TOTAL UNITS SOLD', 'TOTAL $ SOLD', 'Dropship (False/True)', 'Product Category', 'Vendor']
 
         SaleReport = request.env['sale.report'].sudo()
         PurchaseOrder = request.env['purchase.order'].sudo()
@@ -28,8 +25,6 @@ class PurchaseReportExport(http.Controller):
             date_start = from_date + relativedelta(months=i)
             headers.insert(9 + i, date_start.strftime('%b-%y'))
             domain_dates[date_start.strftime('%B %Y')] = 9 + i
-
-        writer.writerow(headers)
 
         domain = [('type', '=', 'product'), ('purchase_ok', '=', True)]
         if report_filter.categ_id:
@@ -44,8 +39,9 @@ class PurchaseReportExport(http.Controller):
         else:
             domain += [('ca_product_type', 'in', ['Item', 'Parent'])]
 
+        data = []
+        sales_sum = 0
         products = request.env['product.product'].sudo().search(domain)
-
         for product in products:
             product_available = product._product_available().get(product.id, {})
             margin = (1 - (product.standard_price / product.lst_price)) if product.lst_price else 0
@@ -54,9 +50,9 @@ class PurchaseReportExport(http.Controller):
                 product.display_name,
                 product.standard_price,
                 product.lst_price,
-                margin,
+                '%.2f%%' % (margin * 100),
                 product_available.get('qty_available', 0),
-                0,
+                '',
                 product_available.get('incoming_qty', 0),
                 0,
                 0,
@@ -97,11 +93,42 @@ class PurchaseReportExport(http.Controller):
                 sales_qty_total += sales_qty
                 vals[domain_dates.get(rec['date:month'])] = sales_qty
 
-            vals[8] = sales_qty_total / 13
+            sales_sum += sales_total
+            vals[8] = '%.2f' % (sales_qty_total / 13)
             vals[22] = product.reordering_min_qty
             vals[23] = product.reordering_max_qty
             vals[24] = sales_qty_total
             vals[25] = sales_total
+            data.append(vals)
+
+        data.sort(key=lambda r: r[25], reverse=True)
+        sum_a = sales_sum * 0.8
+        sum_b = sales_sum * 0.15
+        sum_c = sales_sum * 0.05
+
+        csv_file = io.StringIO()
+        writer = csv.writer(csv_file)
+        writer.writerow(headers)
+
+        sales_total = 0
+        for vals in data:
+            sales_total += vals[25]
+            if sum_a:
+                if sales_total <= sum_a:
+                    vals[6] = 'A'
+                else:
+                    sales_total = 0
+                    sum_a = 0
+                    vals[6] = 'A'
+            elif sum_b:
+                if sales_total <= sum_b:
+                    vals[6] = 'B'
+                else:
+                    sum_b = 0
+                    vals[6] = 'B'
+            else:
+                vals[6] = 'C'
+
             writer.writerow(vals)
 
         response = request.make_response(
