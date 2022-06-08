@@ -52,6 +52,8 @@ class ShipstationAccounts(models.Model):
         api_url = SHIPSTATION_ENDPOINT + request_url
         try:
             req = requests.request(method, api_url, auth=HTTPBasicAuth(self.api_key, self.api_secret), headers=headers, data=data)
+            if req.status_code in [400, 401]:
+                raise ValidationError(_("Error From ShipStation Invalid Username and Password : %s" % req.text))
             req.raise_for_status()
             response_text = req.text
         except requests.HTTPError as e:
