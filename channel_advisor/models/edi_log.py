@@ -214,14 +214,13 @@ class TransactionLogger(models.Model):
         if line.get('promo_amt'):
             promo_amt = promo_amt + line.get('promo_amt')
 
-
-        if line.get('TaxPrice') and line.get('UnitPrice', ''):
-            tax = round(((line.get('TaxPrice')/line.get('UnitPrice', '')) *100),2)
+        if line.get('TaxPrice') and line.get('UnitPrice', '') and line.get('Quantity', 0):
+            tax = round(((line.get('TaxPrice') / (line.get('UnitPrice', '') * line.get('Quantity', 0))) * 100), 2)
             taxes = self.env['account.tax'].search([('amount', '=', tax), ('type_tax_use', '!=', 'purchase')])
             if not taxes:
-                values= {'name':  str(tax),
-                       'amount':tax
-                       }
+                values = {'name': str(tax),
+                          'amount': tax
+                          }
                 taxes = self.env['account.tax'].create(values)
         vals = {
 
