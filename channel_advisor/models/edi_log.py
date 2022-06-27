@@ -133,7 +133,7 @@ class TransactionLogger(models.Model):
         :param address_type: string 'delivery' or 'invoice'
         :return: Partner Address recordset
         """
-        name = address.get('FirstName', '') + address.get('LastName', '')
+        name = address.get('FirstName', '') +  ' ' + address.get('LastName', '')
         email = address.get('BuyerEmailAddress', '')
         street  = address.get('address1', '')
         street2  = address.get('address2', '')
@@ -175,7 +175,7 @@ class TransactionLogger(models.Model):
                         [('name', '=', address.get('RegionDescription', '')), ('country_id', '=', Country.id)])
 
             vals = {
-                'name':  address.get('FirstName', '') +  '' + address.get('LastName', '') or '',
+                'name':  address.get('FirstName', '') +  ' ' + address.get('LastName', '') or '',
                 'email': email,
                 'phone': phone,
                 'street': street,
