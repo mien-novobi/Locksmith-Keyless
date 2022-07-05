@@ -346,7 +346,9 @@ class TransactionLogger(models.Model):
         if not saleorder:
             saleorder = SaleOrder.create(vals)
 
-        if saleorder.state in  ['draft', 'sent'] and Customer.name != 'Checkout Direct' and data.get('Paymentstatus') == 'Cleared':
+        if saleorder.state in ['draft', 'sent'] and Customer.name != 'Checkout Direct' and data.get('Paymentstatus') == 'Cleared':
+            if Customer and Customer.ca_site_id == 640 and delivery_address:
+                saleorder.write({'partner_shipping_id': delivery_address.id})
             saleorder.action_confirm()
             saleorder.write({'date_order': data.get('date_order')})
             if saleorder.is_fba:
