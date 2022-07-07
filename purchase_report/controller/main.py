@@ -16,7 +16,8 @@ class PurchaseReportExport(http.Controller):
 
         headers = ['Internal Reference', 'Name', 'Cost', 'Sales Price', 'MARK-UP', 'Quantity On Hand', 'ABC classification', 'Quantity on order', 'Monthly Avg Sales', 'MIN QUANTITY', 'MAX QUANTITY', 'TOTAL UNITS SOLD', 'TOTAL $ SOLD', 'Dropship (False/True)', 'Product Category', 'Vendor']
 
-        SaleReport = request.env['sale.report'].sudo()
+        # SaleReport = request.env['sale.report'].sudo()
+        StockMove = request.env['stock.move.line'].sudo()
         PurchaseOrder = request.env['purchase.order'].sudo()
         today = date.today()
         from_date = today - relativedelta(months=12, day=1)
@@ -26,7 +27,7 @@ class PurchaseReportExport(http.Controller):
             headers.insert(9 + i, date_start.strftime('%b-%y'))
             domain_dates[date_start.strftime('%B %Y')] = 9 + i
 
-        domain = [('type', '=', 'product'), ('purchase_ok', '=', True)]
+        domain = [('type', '=', 'product'), ('purchase_ok', '=', True),('ca_bundle_product_ids', '=', False)]
         if report_filter.categ_id:
             domain += [('categ_id', '=', report_filter.categ_id.id)]
 
@@ -77,19 +78,20 @@ class PurchaseReportExport(http.Controller):
                 product.seller_ids[:1].name.name or '',
             ]
 
-            product_sales = SaleReport.read_group([
-                ('product_id', '=', product.id),
-                ('state', 'in', ['sale', 'done']),
+            product_sales = StockMove.read_group([
+                ('product_id', '=', product.id), ('picking_id.picking_type_code', '=', 'outgoing'),
                 ('date', '>=', from_date.strftime('%Y-%m-%d')),
                 ('date', '<=', today.strftime('%Y-%m-%d')),
-            ], ['date', 'price_subtotal', 'product_uom_qty'],
-            groupby=['date:month'],
-            orderby='date ASC', lazy=True)
+            ], ['date', 'product_uom_qty', 'qty_done'],
+                # ], ['date', 'price_subtotal', 'product_uom_qty'],
+                groupby=['date:month'],
+                orderby='date ASC', lazy=True)
             sales_total = 0
             sales_qty_total = 0
             for rec in product_sales:
-                sales_total += rec.get('price_subtotal', 0.0)
-                sales_qty = rec.get('product_uom_qty', 0.0)
+                sales_total += (rec.get('product_uom_qty', 0.0) + rec.get('qty_done', 0.0)) * product.lst_price
+                # sales_total += rec.get('price_subtotal', 0.0)
+                sales_qty = rec.get('product_uom_qty', 0.0) + rec.get('qty_done', 0.0)
                 sales_qty_total += sales_qty
                 vals[domain_dates.get(rec['date:month'])] = sales_qty
 
