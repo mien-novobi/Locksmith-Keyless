@@ -41,5 +41,17 @@
             <field name="doall" eval="False" />
         </record>
 
+         <record id="ca_componenet_update" model="ir.cron">
+            <field name="name">Channel Advisor:Component Update</field>
+            <field name="model_id" ref="model_product_template" />
+            <field name="state">code</field>
+            <field name="code">model.update_components_cron()</field>
+            <field name="user_id" ref="base.user_root" />
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="numbercall">-1</field>
+            <field name="doall" eval="False" />
+        </record>
+
     </data>
 </odoo>

@@ -44,6 +44,8 @@
                                 <field name="ca_mpn" readonly="1" />
                                 <field name="ca_condition" readonly="1" />
                                 <field name="is_kit" />
+                                <field name="flag"  invisible ="1"/>
+
                             </group>
                         </group>
                         <group string="Components" attrs="{'invisible': [('is_kit', '=', False)]}">

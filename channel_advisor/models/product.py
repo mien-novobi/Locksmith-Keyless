@@ -14,30 +14,29 @@ import xml.etree.ElementTree as ET
 
 
 class CustomerProduct(models.Model):
-    _name ='customer.product.values'
+    _name = 'customer.product.values'
     _description = 'Saves the customer Info of the product'
 
-    product_id = fields.Many2one('product.template', string= 'Product')
-    name       = fields.Char(string= 'Name')
-    customer_sku = fields.Char(string= 'SKU')
-    partner_id  = fields.Many2one('res.partner', string= 'Partner')
+    product_id = fields.Many2one('product.template', string='Product')
+    name = fields.Char(string='Name')
+    customer_sku = fields.Char(string='SKU')
+    partner_id = fields.Many2one('res.partner', string='Partner')
     agreed_price = fields.Float(string='Agreed Price')
 
     _sql_constraints = [
         ('partner_product_uniq', 'unique (partner_id,product_id)', 'The product must be unique per partner !')
     ]
 
-
     @api.model
     def get_vendor_sku(self, partner=False, product=False):
-        product_record= self.search([('product_id', '=', product.id), ('partner_id', '=', partner.id)], limit=1)
+        product_record = self.search([('product_id', '=', product.id), ('partner_id', '=', partner.id)], limit=1)
         return product_record and product_record.customer_sku or ''
 
 
 class ProductTemplate(models.Model):
     _inherit = "product.template"
 
-    customer_product_value_ids = fields.One2many('customer.product.values', 'product_id', string= 'Customer Reference')
+    customer_product_value_ids = fields.One2many('customer.product.values', 'product_id', string='Customer Reference')
     product_customer_sku = fields.Char(related='customer_product_value_ids.customer_sku', string='Customer SKU')
     ca_product_id = fields.Char("Channel Advisor Product ID")
     ca_profile_id = fields.Char("Channel Advisor Account ID")
@@ -55,8 +54,10 @@ class ProductTemplate(models.Model):
     ca_bundle_ids = fields.One2many('ca.product.bundle', 'product_tmpl_id', string="Bundles")
     ca_bundle_product_ids = fields.One2many('ca.product.bundle', 'bundle_id', string="Components")
     kit_available = fields.Float(compute="_compute_kit_available", digits="Product Unit of Measure")
-    kit_free_qty = fields.Float(compute="_compute_kit_available", string="Free To Use Kits", digits="Product Unit of Measure", compute_sudo=False)
-    free_qty = fields.Float(compute="_compute_free_qty", string="Free To Use Quantity", digits="Product Unit of Measure", compute_sudo=False)
+    kit_free_qty = fields.Float(compute="_compute_kit_available", string="Free To Use Kits",
+                                digits="Product Unit of Measure", compute_sudo=False)
+    free_qty = fields.Float(compute="_compute_free_qty", string="Free To Use Quantity",
+                            digits="Product Unit of Measure", compute_sudo=False)
     is_kit = fields.Boolean(string="Kit?", default=False)
     ca_condition = fields.Selection([
         ('NEW', 'New'),
@@ -66,12 +67,14 @@ class ProductTemplate(models.Model):
         ('LIKE NEW', 'Lke New'),
     ], string="Condition")
     ca_manufacturer = fields.Char(string="Manufacturer")
+    flag = fields.Boolean(string="flag?", default=False)
 
     @api.depends()
     def _compute_free_qty(self):
         variants_available = self.mapped('product_variant_ids')._product_available()
         for template in self:
-            free_qty = sum([variants_available[product.id]['free_qty'] or 0 for product in template.product_variant_ids])
+            free_qty = sum(
+                [variants_available[product.id]['free_qty'] or 0 for product in template.product_variant_ids])
             template.free_qty = free_qty
 
     @api.depends()
@@ -93,7 +96,8 @@ class ProductTemplate(models.Model):
     def _compute_ca_parent_id(self):
         for product in self:
             if product.ca_parent_product_id:
-                parent = self.search([('ca_profile_id', '=', product.ca_profile_id), ('ca_product_id', '=', product.ca_parent_product_id)], limit=1)
+                parent = self.search([('ca_profile_id', '=', product.ca_profile_id),
+                                      ('ca_product_id', '=', product.ca_parent_product_id)], limit=1)
                 product.ca_parent_id = parent.id
             else:
                 product.ca_parent_id = False
@@ -104,20 +108,57 @@ class ProductTemplate(models.Model):
         profile_ids = []
         for rec in self.filtered(lambda r: r.ca_product_type == 'Bundle'):
             if rec.ca_profile_id not in profile_ids or not connector:
-                connector = self.env['ca.connector'].sudo().search([('ca_account_ids.account_id', '=', rec.ca_profile_id)], limit=1)
+                connector = self.env['ca.connector'].sudo().search(
+                    [('ca_account_ids.account_id', '=', rec.ca_profile_id)], limit=1)
                 profile_ids = connector.ca_account_ids.mapped('account_id')
 
             if connector:
                 res = connector.call('retrieve_bundle_components', bundle_id=rec.ca_product_id)
                 components = [(5, 0, 0)]
                 for vals in res.get('value', []):
-                    product = Product.search([('ca_product_id', '=', vals.get('ComponentID')), ('ca_profile_id', '=', vals.get('ProfileID'))], limit=1)
+                    product = Product.search([('ca_product_id', '=', vals.get('ComponentID')),
+                                              ('ca_profile_id', '=', vals.get('ProfileID'))], limit=1)
                     if product:
                         components.append((0, 0, {
                             'product_id': product.id,
                             'quantity': vals.get('Quantity', 0),
                         }))
                 rec.write({'ca_bundle_product_ids': components})
+        return True
+
+    def update_components_cron(self):
+        while self.env['product.product'].search_count(
+                [('flag', '=', False), ('ca_product_type', '=', 'Bundle')]) > 0:
+            Product = self.env['product.product']
+            connector = False
+            profile_ids = []
+            pdt = self.env['product.product'].search(
+                [('flag', '=', False), ('ca_product_type', '=', 'Bundle')], limit=200)
+            for rec in pdt:
+                if rec.ca_profile_id not in profile_ids or not connector:
+                    connector = self.env['ca.connector'].sudo().search(
+                        [('ca_account_ids.account_id', '=', rec.ca_profile_id)], limit=1)
+                    profile_ids = connector.ca_account_ids.mapped('account_id')
+
+                if connector:
+                    res = connector.call('retrieve_bundle_components', bundle_id=rec.ca_product_id)
+                    components = [(5, 0, 0)]
+                    for vals in res.get('value', []):
+                        product = Product.search([('ca_product_id', '=', vals.get('ComponentID')),
+                                                  ('ca_profile_id', '=', vals.get('ProfileID'))], limit=1)
+                        if product:
+                            components.append((0, 0, {
+                                'product_id': product.id,
+                                'quantity': vals.get('Quantity', 0),
+                            }))
+
+                    rec.write({'ca_bundle_product_ids': components})
+                    rec.write({'flag': True})
+            self._cr.commit()
+        Products = self.env['product.product'].search(
+            [('ca_product_type', '=', 'Bundle'), ('flag', '=', True)])
+        for prod in Products:
+            prod.write({'flag': False})
         return True
 
     def ca_update_quantity(self):
@@ -127,7 +168,8 @@ class ProductTemplate(models.Model):
         for product in self:
             if product.is_kit:
                 # component_price = sum([item.product_id.lst_price * item.quantity for item in product.ca_bundle_product_ids])
-                component_cost = sum([item.product_id.standard_price * item.quantity for item in product.ca_bundle_product_ids])
+                component_cost = sum(
+                    [item.product_id.standard_price * item.quantity for item in product.ca_bundle_product_ids])
                 product.write({
                     # 'list_price': component_price,
                     'standard_price': component_cost,
@@ -171,9 +213,9 @@ class ProductProduct(models.Model):
     def inventory_update(self):
 
         xml_string = self.get_pdt_xml()
-        date_today  = datetime.datetime.strptime(str(fields.Datetime.now()) , '%Y-%m-%d %H:%M:%S').strftime('%Y-%m-%d')
+        date_today = datetime.datetime.strptime(str(fields.Datetime.now()), '%Y-%m-%d %H:%M:%S').strftime('%Y-%m-%d')
         # save_path_file = "Inventory_%s.xml" % date_today
-        save_path_file = "/home/locksmith_keyless_13/odoo13/inventory_updates/" +"Inventory_%s.xml" % date_today
+        save_path_file = "/home/locksmith_keyless_13/odoo13/inventory_updates/" + "Inventory_%s.xml" % date_today
         with open(save_path_file, "w") as f:
             f.write(xml_string)
         return True
@@ -182,11 +224,11 @@ class ProductProduct(models.Model):
 
         xmlns_uris = {'soapenv': 'http://schemas.xmlsoap.org/soap/envelope/',
                       'web': 'http://api.channeladvisor.com/webservices/'}
-        try :
+        try:
             products = self.search([('type', '=', 'product')])
             root_node = ET.Element("soapenv:Envelope")
             soap_header = SubElement(root_node, 'soapenv:Header')
-            api_cred= SubElement(soap_header, 'web:APICredentials')
+            api_cred = SubElement(soap_header, 'web:APICredentials')
             SubElement(api_cred, 'web:DeveloperKey').text = 'test'
             SubElement(api_cred, 'web:Password').text = 'test'
             soap_body = SubElement(root_node, 'soapenv:Body')
@@ -210,15 +252,15 @@ class ProductProduct(models.Model):
         except Exception as e:
             raise UserError("Exception in Inventory processing\n %s " % e)
 
-
-    def add_XMLNS_attributes(self,tree, xmlns_uris_dict):
+    def add_XMLNS_attributes(self, tree, xmlns_uris_dict):
         if not ET.iselement(tree):
             tree = tree.getroot()
         for prefix, uri in xmlns_uris_dict.items():
             tree.attrib['xmlns:' + prefix] = uri
 
     def ca_update_quantity(self):
-        dist_centers = self.env['ca.distribution.center'].search([('type', '=', 'Warehouse'), ('warehouse_id', '!=', False)])
+        dist_centers = self.env['ca.distribution.center'].search(
+            [('type', '=', 'Warehouse'), ('warehouse_id', '!=', False)])
         if not dist_centers:
             return
 
@@ -234,7 +276,7 @@ class ProductProduct(models.Model):
                 if product.is_kit:
                     qty_available = product.with_context(warehouse=dist_center.warehouse_id.id).kit_free_qty
                 else:
-                   qty_available = product.with_context(warehouse=dist_center.warehouse_id.id).free_qty
+                    qty_available = product.with_context(warehouse=dist_center.warehouse_id.id).free_qty
 
                 vals['Value']['Updates'].append({
                     'DistributionCenterID': int(dist_center.res_id),
@@ -251,7 +293,8 @@ class ProductProduct(models.Model):
                     product.ca_bundle_ids.mapped('bundle_id').update_bundle_price()
 
             if not self._context.get('ca_import', False):
-                apps = self.env['ca.connector'].sudo().search([('state', '=', 'active'), ('auto_update_cost', '=', True)])
+                apps = self.env['ca.connector'].sudo().search(
+                    [('state', '=', 'active'), ('auto_update_cost', '=', True)])
                 for app in apps:
                     for product in self.filtered(lambda r: r.ca_profile_id in app.ca_account_ids.mapped('account_id')):
                         vals = {'Cost': product.standard_price}
@@ -266,9 +309,9 @@ class ProductBundle(models.Model):
 
     product_id = fields.Many2one('product.product', string="Component", ondelete="cascade")
     product_tmpl_id = fields.Many2one(related="product_id.product_tmpl_id", store=True)
-    product_type = fields.Selection(related="product_id.ca_product_type", string="Product type", readonly=True, store=False)
+    product_type = fields.Selection(related="product_id.ca_product_type", string="Product type", readonly=True,
+                                    store=False)
     quantity = fields.Float(string="Quantity", default=1)
     bundle_id = fields.Many2one('product.template', string="Bundle", ondelete="cascade")
-
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
