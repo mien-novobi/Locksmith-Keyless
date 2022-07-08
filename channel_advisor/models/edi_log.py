@@ -188,6 +188,8 @@ class TransactionLogger(models.Model):
                 'company_type': 'person',
                 # 'parent_id': customer.id
             }
+            if customer and customer.ca_site_id == 862:
+                vals.update({'default_analytic_account_id': customer.default_analytic_account_id and customer.default_analytic_account_id.id, })
 
             del_addr = customer.create(vals)
         return del_addr
