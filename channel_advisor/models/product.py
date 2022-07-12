@@ -144,6 +144,7 @@ class ProductTemplate(models.Model):
                     profile_ids = connector.ca_account_ids.mapped('account_id')
 
                 if connector:
+                    _logger.info("bundlebundlebundle", rec.ca_product_id)
                     res = connector.call('retrieve_bundle_components', bundle_id=rec.ca_product_id)
                     components = [(5, 0, 0)]
                     for vals in res.get('value', []):

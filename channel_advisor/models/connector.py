@@ -6,7 +6,9 @@ import requests
 from datetime import datetime, timedelta
 
 from odoo import api, fields, models
+import logging
 
+_logger = logging.getLogger("connrctor")
 
 class ChannelAdvisorConnector(models.Model):
     _name = "ca.connector"
@@ -143,8 +145,13 @@ class ChannelAdvisorConnector(models.Model):
 
         elif method == "retrieve_bundle_components":
             if kwargs.get('bundle_id'):
+                _logger.info("bundle_id", kwargs['bundle_id'])
+
                 resource_url = self.base_url + "/v1/Products(%s)/BundleComponents?access_token=%s" % (kwargs['bundle_id'], self._access_token())
+                _logger.info(resource_url)
                 res = requests.get(resource_url)
+                _logger.info(res)
+
                 data = res.json()
 
         elif method == "get_payment_status":
