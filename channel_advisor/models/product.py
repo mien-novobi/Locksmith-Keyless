@@ -11,6 +11,9 @@ from xml.etree.ElementTree import Element, SubElement
 from xml.etree import ElementTree
 from xml.dom import minidom
 import xml.etree.ElementTree as ET
+import logging
+
+_logger = logging.getLogger("Cron")
 
 
 class CustomerProduct(models.Model):
@@ -151,9 +154,12 @@ class ProductTemplate(models.Model):
                                 'product_id': product.id,
                                 'quantity': vals.get('Quantity', 0),
                             }))
+                    _logger.info("componentscomponentscomponentscomponents",components)
 
                     rec.write({'ca_bundle_product_ids': components})
                     rec.write({'flag': True})
+                    _logger.info("recrecrecc",rec,rec.ca_bundle_product_ids)
+
             self._cr.commit()
         Products = self.env['product.product'].search(
             [('ca_product_type', '=', 'Bundle'), ('flag', '=', True)])
