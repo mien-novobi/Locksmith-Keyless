@@ -13,7 +13,7 @@ from xml.dom import minidom
 import xml.etree.ElementTree as ET
 import logging
 
-_logger = logging.getLogger("Cron")
+_logger = logging.getLogger(__name__)
 
 
 class CustomerProduct(models.Model):
