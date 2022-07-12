@@ -12,8 +12,8 @@ from xml.etree import ElementTree
 from xml.dom import minidom
 import xml.etree.ElementTree as ET
 import logging
+_logger = logging.getLogger("ProductTemplate")
 
-_logger = logging.getLogger(__name__)
 
 
 class CustomerProduct(models.Model):
