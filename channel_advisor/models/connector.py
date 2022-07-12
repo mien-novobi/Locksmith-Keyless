@@ -143,7 +143,6 @@ class ChannelAdvisorConnector(models.Model):
         elif method == "retrieve_bundle_components":
             if kwargs.get('bundle_id'):
                 resource_url = self.base_url + "/v1/Products(%s)/BundleComponents?access_token=%s" % (kwargs['bundle_id'], self._access_token())
-                _logger.info(resource_url)
                 res = requests.get(resource_url)
                 data = res.json()
 
