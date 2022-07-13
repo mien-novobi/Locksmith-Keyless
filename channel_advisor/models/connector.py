@@ -6,7 +6,7 @@ import requests
 from datetime import datetime, timedelta
 
 from odoo import api, fields, models
-
+import logging
 class ChannelAdvisorConnector(models.Model):
     _name = "ca.connector"
     _description = "Channel Advisor Connector"
@@ -144,6 +144,8 @@ class ChannelAdvisorConnector(models.Model):
             if kwargs.get('bundle_id'):
                 resource_url = self.base_url + "/v1/Products(%s)/BundleComponents?access_token=%s" % (kwargs['bundle_id'], self._access_token())
                 res = requests.get(resource_url)
+                logging.info("@@@@@@@@@@@@")
+                logging.info(res)
                 data = res.json()
 
         elif method == "get_payment_status":

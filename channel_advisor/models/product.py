@@ -12,7 +12,6 @@ from xml.etree import ElementTree
 from xml.dom import minidom
 import xml.etree.ElementTree as ET
 import logging
-_logger = logging.getLogger("ProductTemplate")
 
 
 
@@ -144,7 +143,8 @@ class ProductTemplate(models.Model):
                     profile_ids = connector.ca_account_ids.mapped('account_id')
 
                 if connector:
-                    _logger.info("bundlebundlebundle", rec.ca_product_id)
+                    logging.info("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
+                    logging.info(rec.ca_product_id)
                     res = connector.call('retrieve_bundle_components', bundle_id=rec.ca_product_id)
                     components = [(5, 0, 0)]
                     for vals in res.get('value', []):
@@ -155,11 +155,12 @@ class ProductTemplate(models.Model):
                                 'product_id': product.id,
                                 'quantity': vals.get('Quantity', 0),
                             }))
-                    _logger.info("componentscomponentscomponentscomponents",components)
+                    logging.info("componentscomponentscomponentscomponents")
+                    logging.info(components)
 
                     rec.write({'ca_bundle_product_ids': components})
                     rec.write({'flag': True})
-                    _logger.info("recrecrecc",rec,rec.ca_bundle_product_ids)
+                    logging.info(rec.ca_bundle_product_ids)
 
             self._cr.commit()
         Products = self.env['product.product'].search(
