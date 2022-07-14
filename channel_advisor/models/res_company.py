@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from odoo import api, fields, models, _
+import logging
 
 
 class ResCompany(models.Model):
@@ -49,11 +50,11 @@ class ResCompany(models.Model):
         sale_order = self.env['sale.order'].browse(order_lst)
         for rec in sale_order:
             logging.info("sale_order")
-            logging.info(sale_order.analytic_account_id)
+            logging.info(sale_order.analytic_account_id.name)
 
             for invoice in rec.invoice_ids:
                 logging.info("Invoice")
-                logging.info(invoice.invoice_line_ids.analytic_account_id)
+                logging.info(invoice.invoice_line_ids.analytic_account_id.name)
                 # invoice.invoice_line_ids.write({'analytic_account_id': 2})
 
 
