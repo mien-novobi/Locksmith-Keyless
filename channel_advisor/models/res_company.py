@@ -7,7 +7,6 @@ import logging
 class ResCompany(models.Model):
     _inherit = "res.company"
 
-
     shipping_cost_product_id = fields.Many2one('product.product', string="Shipping Cost Product")
     tax_product_id = fields.Many2one('product.product', string="TotalTaxPrice Product")
     gift_product_id = fields.Many2one('product.product', string="TotalGiftOptionPrice Product")
@@ -46,13 +45,15 @@ class ResCompany(models.Model):
                      61802, 61792, 61790, 61788, 61789, 61787, 61786, 61771, 61765, 61758, 61759, 61757, 61755, 61749,
                      61735, 61730, 61726, 61718, 61701, 61692, 61687, 61675, 61670, 61668, 61665, 61662, 61661, 61658,
                      61656, 61646, 61641, 61640, 61622, 61620, 61617, 61616, 61615, 61612, 61611, 61610, 61608, 61586,
-                     61581, 61567, 61566, 61564, 61559, 61558, 61541,65303,65296,65210,65185,65160,65051,64979,64916,
-                     64917,64894,64849,64801,64790,64787,64780,64779,64753,64737,64726,64708,64662,64634,64587,64577,
+                     61581, 61567, 61566, 61564, 61559, 61558, 61541, 65303, 65296, 65210, 65185, 65160, 65051, 64979,
+                     64916,
+                     64917, 64894, 64849, 64801, 64790, 64787, 64780, 64779, 64753, 64737, 64726, 64708, 64662, 64634,
+                     64587, 64577,
                      ]
         sale_order = self.env['sale.order'].browse(order_lst)
         for rec in sale_order:
             logging.info("sale_order")
-            logging.info(sale_order.id)
+            logging.info(rec.analytic_account_id.id)
 
             logging.info(sale_order.analytic_account_id)
 
