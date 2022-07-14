@@ -165,6 +165,9 @@ class TransactionLogger(models.Model):
                 'type': 'contact',
                 'company_type': 'person',
             })
+            if customer and customer.ca_site_id == 862:
+                del_addr.write({
+                                'default_analytic_account_id': customer.default_analytic_account_id and customer.default_analytic_account_id.id, })
         else:
             State = False
             Country = False
