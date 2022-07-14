@@ -52,7 +52,7 @@ class ResCompany(models.Model):
         sale_order = self.env['sale.order'].browse(order_lst)
         for rec in sale_order:
             logging.info("sale_order")
-            logging.info(sale_order.analytic_account_id.id)
+            logging.info(sale_order.id)
 
             logging.info(sale_order.analytic_account_id)
 
