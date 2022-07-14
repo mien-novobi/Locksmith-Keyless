@@ -134,12 +134,15 @@ class ProductTemplate(models.Model):
         return True
 
     def update_components_cron(self):
-        while self.env['product.product'].search_count(
+        while self.env['product.template'].search_count(
                 [('flag', '=', False), ('ca_product_type', '=', 'Bundle')]) > 0:
+            x = self.env['product.template'].search_count(
+                [('flag', '=', False), ('ca_product_type', '=', 'Bundle')])
+            logging.info(x)
             Product = self.env['product.product']
             connector = False
             profile_ids = []
-            pdt = self.env['product.product'].search(
+            pdt = self.env['product.template'].search(
                 [('flag', '=', False), ('ca_product_type', '=', 'Bundle')], limit=200)
             for rec in pdt:
                 if rec.ca_profile_id not in profile_ids or not connector:
@@ -168,7 +171,7 @@ class ProductTemplate(models.Model):
                     logging.info(rec.ca_bundle_product_ids)
 
             self._cr.commit()
-        Products = self.env['product.product'].search(
+        Products = self.env['product.template'].search(
             [('ca_product_type', '=', 'Bundle'), ('flag', '=', True)])
         logging.info("Products")
         logging.info(Products)
