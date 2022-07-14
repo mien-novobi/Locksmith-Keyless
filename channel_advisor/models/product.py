@@ -108,7 +108,12 @@ class ProductTemplate(models.Model):
         Product = self.env['product.product']
         connector = False
         profile_ids = []
+        logging.info("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
+        logging.info(self)
+
         for rec in self.filtered(lambda r: r.ca_product_type == 'Bundle'):
+            logging.info(rec)
+
             if rec.ca_profile_id not in profile_ids or not connector:
                 connector = self.env['ca.connector'].sudo().search(
                     [('ca_account_ids.account_id', '=', rec.ca_profile_id)], limit=1)
