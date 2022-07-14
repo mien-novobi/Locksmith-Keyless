@@ -155,8 +155,8 @@ class ProductTemplate(models.Model):
                                 'product_id': product.id,
                                 'quantity': vals.get('Quantity', 0),
                             }))
-                    logging.info("componentscomponentscomponentscomponents")
-                    logging.info(components)
+                            logging.info("componentscomponentscomponentscomponents")
+                            logging.info(components)
 
                     rec.write({'ca_bundle_product_ids': components})
                     rec.write({'flag': True})
@@ -165,6 +165,8 @@ class ProductTemplate(models.Model):
             self._cr.commit()
         Products = self.env['product.product'].search(
             [('ca_product_type', '=', 'Bundle'), ('flag', '=', True)])
+        logging.info("Products")
+        logging.info(Products)
         for prod in Products:
             prod.write({'flag': False})
         return True
