@@ -134,45 +134,45 @@ class ProductTemplate(models.Model):
         return True
 
     def update_components_cron(self):
-        while self.env['product.template'].search_count(
-                [('flag', '=', False), ('ca_product_type', '=', 'Bundle')]) > 0:
-            x = self.env['product.template'].search_count(
-                [('flag', '=', False), ('ca_product_type', '=', 'Bundle')])
-            logging.info(x)
-            Product = self.env['product.product']
-            connector = False
-            profile_ids = []
-            pdt = self.env['product.template'].search(
-                [('flag', '=', False), ('ca_product_type', '=', 'Bundle')], limit=200)
-            for rec in pdt:
-                if rec.ca_profile_id not in profile_ids or not connector:
-                    connector = self.env['ca.connector'].sudo().search(
-                        [('ca_account_ids.account_id', '=', rec.ca_profile_id)], limit=1)
-                    profile_ids = connector.ca_account_ids.mapped('account_id')
-
-                if connector:
-                    logging.info("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
-                    logging.info(rec.ca_product_id)
-                    res = connector.call('retrieve_bundle_components', bundle_id=rec.ca_product_id)
-                    components = [(5, 0, 0)]
-                    for vals in res.get('value', []):
-                        product = Product.search([('ca_product_id', '=', vals.get('ComponentID')),
-                                                  ('ca_profile_id', '=', vals.get('ProfileID'))], limit=1)
-                        if product:
-                            components.append((0, 0, {
-                                'product_id': product.id,
-                                'quantity': vals.get('Quantity', 0),
-                            }))
-                            logging.info("componentscomponentscomponentscomponents")
-                            logging.info(components)
-
-                    rec.write({'ca_bundle_product_ids': components})
-                    rec.write({'flag': True})
-                    logging.info(rec.ca_bundle_product_ids)
-
-            self._cr.commit()
+        # while self.env['product.template'].search_count(
+        #         [('flag', '=', False), ('ca_product_type', '=', 'Bundle')]) > 0:
+        #     x = self.env['product.template'].search_count(
+        #         [('flag', '=', False), ('ca_product_type', '=', 'Bundle')])
+        #     logging.info(x)
+        #     Product = self.env['product.product']
+        #     connector = False
+        #     profile_ids = []
+        #     pdt = self.env['product.template'].search(
+        #         [('flag', '=', False), ('ca_product_type', '=', 'Bundle')], limit=200)
+        #     for rec in pdt:
+        #         if rec.ca_profile_id not in profile_ids or not connector:
+        #             connector = self.env['ca.connector'].sudo().search(
+        #                 [('ca_account_ids.account_id', '=', rec.ca_profile_id)], limit=1)
+        #             profile_ids = connector.ca_account_ids.mapped('account_id')
+        #
+        #         if connector:
+        #             logging.info("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
+        #             logging.info(rec.ca_product_id)
+        #             res = connector.call('retrieve_bundle_components', bundle_id=rec.ca_product_id)
+        #             components = [(5, 0, 0)]
+        #             for vals in res.get('value', []):
+        #                 product = Product.search([('ca_product_id', '=', vals.get('ComponentID')),
+        #                                           ('ca_profile_id', '=', vals.get('ProfileID'))], limit=1)
+        #                 if product:
+        #                     components.append((0, 0, {
+        #                         'product_id': product.id,
+        #                         'quantity': vals.get('Quantity', 0),
+        #                     }))
+        #                     logging.info("componentscomponentscomponentscomponents")
+        #                     logging.info(components)
+        #
+        #             rec.write({'ca_bundle_product_ids': components})
+        #             rec.write({'flag': True})
+        #             logging.info(rec.ca_bundle_product_ids)
+        #
+        #     self._cr.commit()
         Products = self.env['product.template'].search(
-            [('ca_product_type', '=', 'Bundle'), ('flag', '=', True)])
+            [('flag', '=', True)])
         logging.info("Products")
         logging.info(Products)
         for prod in Products:
