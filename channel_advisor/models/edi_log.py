@@ -25,12 +25,11 @@ class TransactionLogger(models.Model):
     def convert_date_time(self, date_str):
         try:
             date_str1 = parser.parse(date_str).strftime("%Y-%m-%d %H:%M:%S")
-            res= datetime.strptime(date_str1,"%Y-%m-%d %H:%M:%S")
+            res = datetime.strptime(date_str1, "%Y-%m-%d %H:%M:%S")
             return res
 
         except:
             raise UserError("Date format is invalid %s" % date_str)
-
 
     def _get_values(self, node):
 
@@ -60,19 +59,19 @@ class TransactionLogger(models.Model):
             ship_info.update({
                 'CountryCode': (node.get('ShippingCountry') or '').strip(),
             })
-        if node.get('ShippingFirstName', '',):
+        if node.get('ShippingFirstName', '', ):
             ship_info.update({
-                'FirstName': node.get('ShippingFirstName', '',),
+                'FirstName': node.get('ShippingFirstName', '', ),
             })
-        if node.get('ShippingLastName', '',):
+        if node.get('ShippingLastName', '', ):
             ship_info.update({
-                'LastName': node.get('ShippingLastName', '',),
+                'LastName': node.get('ShippingLastName', '', ),
             })
-        if node.get('ShippingDaytimePhone', '',):
+        if node.get('ShippingDaytimePhone', '', ):
             ship_info.update({
-                'PhoneNumberDay': node.get('ShippingDaytimePhone', '',),
+                'PhoneNumberDay': node.get('ShippingDaytimePhone', '', ),
             })
-        ship_info['BuyerEmailAddress'] =  node.get('BuyerEmailAddress', '')
+        ship_info['BuyerEmailAddress'] = node.get('BuyerEmailAddress', '')
         res.update({'order_no': node.get('ID', ''),
                     'ProfileID': node.get('ProfileID', ''),
                     'SiteName': node.get('SiteName', ''),
@@ -91,14 +90,14 @@ class TransactionLogger(models.Model):
                     'PrivateNotes': node.get('PrivateNotes', ''),
                     'TotalGiftOptionTaxPrice': node.get('TotalGiftOptionTaxPrice', ''),
                     'TotalShippingTaxPrice': node.get('TotalShippingTaxPrice', ''),
-                    'Paymentstatus' : node.get('PaymentStatus', ''),
+                    'Paymentstatus': node.get('PaymentStatus', ''),
                     })
         if ship_info:
             res.update({'ship_info': ship_info})
-        if  not res.get('lines'):
+        if not res.get('lines'):
             res.update({'lines': {}})
         if node.get('CreatedDateUtc'):
-            create_date = self.convert_date_time(node.get('CreatedDateUtc', ''),)
+            create_date = self.convert_date_time(node.get('CreatedDateUtc', ''), )
             res.update({'date_order': create_date})
 
         if node.get('Items'):
@@ -112,11 +111,12 @@ class TransactionLogger(models.Model):
                     res['lines'][LineItemID].update({'Title': line_item.get('Title') or ''})
                     res['lines'][LineItemID].update({'ProductID': line_item.get('ProductID') or ''})
                     res['lines'][LineItemID].update({'TaxPrice': line_item.get('TaxPrice') or 0.0})
-                    promo_amt=0.0
+                    promo_amt = 0.0
                     if line_item.get('Promotions'):
                         for promo in line_item.get('Promotions'):
-                            promo_amt = promo_amt +(promo.get('Amount') or 0.0 )+(promo.get('ShippingAmount') or 0.0 )
-                        res['lines'][LineItemID].update({'promo_amt': promo_amt or '0.0','code':promo.get('Code') or ''})
+                            promo_amt = promo_amt + (promo.get('Amount') or 0.0) + (promo.get('ShippingAmount') or 0.0)
+                        res['lines'][LineItemID].update(
+                            {'promo_amt': promo_amt or '0.0', 'code': promo.get('Code') or ''})
 
         if node.get('Fulfillments'):
             for fulfilment in node.get('Fulfillments'):
@@ -133,10 +133,10 @@ class TransactionLogger(models.Model):
         :param address_type: string 'delivery' or 'invoice'
         :return: Partner Address recordset
         """
-        name = address.get('FirstName', '') +  ' ' + address.get('LastName', '')
+        name = address.get('FirstName', '') + ' ' + address.get('LastName', '')
         email = address.get('BuyerEmailAddress', '')
-        street  = address.get('address1', '')
-        street2  = address.get('address2', '')
+        street = address.get('address1', '')
+        street2 = address.get('address2', '')
         state = address.get('RegionDescription', '')
         city = address.get('City', '')
         zip_code = address.get('PostalCode', '')
@@ -167,18 +167,18 @@ class TransactionLogger(models.Model):
             })
             if customer and customer.ca_site_id == 862:
                 del_addr.write({
-                                'default_analytic_account_id': customer.default_analytic_account_id and customer.default_analytic_account_id.id, })
+                    'default_analytic_account_id': customer.default_analytic_account_id and customer.default_analytic_account_id.id, })
         else:
             State = False
             Country = False
-            if  address.get('CountryCode', ''):
-                Country = self.env['res.country'].search([('code', '=', address.get('CountryCode', ''))])
+            if address.get('CountryCode', ''):
+                Country = self.env['res.country'].search([('code', '=', address.get('CountryCode', ''))], limit=1)
                 if Country:
                     State = self.env['res.country.state'].search(
-                        [('name', '=', address.get('RegionDescription', '')), ('country_id', '=', Country.id)])
+                        [('name', '=', address.get('RegionDescription', '')), ('country_id', '=', Country.id)], limit=1)
 
             vals = {
-                'name':  address.get('FirstName', '') +  ' ' + address.get('LastName', '') or '',
+                'name': address.get('FirstName', '') + ' ' + address.get('LastName', '') or '',
                 'email': email,
                 'phone': phone,
                 'street': street,
@@ -192,7 +192,8 @@ class TransactionLogger(models.Model):
                 # 'parent_id': customer.id
             }
             if customer and customer.ca_site_id == 862:
-                vals.update({'default_analytic_account_id': customer.default_analytic_account_id and customer.default_analytic_account_id.id, })
+                vals.update({
+                                'default_analytic_account_id': customer.default_analytic_account_id and customer.default_analytic_account_id.id, })
 
             del_addr = customer.create(vals)
         return del_addr
@@ -204,7 +205,7 @@ class TransactionLogger(models.Model):
         :return: dict
         """
 
-        vals ={}
+        vals = {}
         promo_amt = 0
         taxes = self.env['account.tax']
         is_review = False
@@ -237,27 +238,26 @@ class TransactionLogger(models.Model):
             'promotion_code': line.get('promo_code', ''),
             'promo_amt': promo_amt,
             'tax_id': [[6, False, taxes.ids or []]],
-            'is_review':is_review
+            'is_review': is_review
 
         }
         return vals
 
-
-    def create_order(self, data,center_dict):
+    def create_order(self, data, center_dict):
         """
         Create SaleOrder from EDI data
         :param data: dict
         :return: Order recordset
         """
         delivery_address = False
-        is_review_lst =[]
+        is_review_lst = []
         is_review = False
         if data.get('SiteID'):
             site = data.get('SiteID')
             site_name = data.get('SiteName')
             if site:
                 Customer = self.env['res.partner'].search(
-                [('ca_site_id', '=', site)])
+                    [('ca_site_id', '=', site)])
             else:
                 Customer = self.env['res.partner'].search(
                     [('name', '=ilike', site_name)])
@@ -265,24 +265,24 @@ class TransactionLogger(models.Model):
                 # Customer = self.env['res.partner'].search(
                 #     [('name', '=ilike', 'Checkout Direct')])
                 raise UserError('Customer  %s not Found ' % data.get('SiteName'))
-        if data.get('ship_info', '') :
+        if data.get('ship_info', ''):
             address = data.get('ship_info', '')
             delivery_address = self.find_or_create_address(Customer, address, 'delivery')
         if Customer.name == "Shopify" or Customer.ca_site_id == 862:
             if delivery_address:
                 Customer = delivery_address
         vals = {
-            'partner_id':Customer.id,
+            'partner_id': Customer.id,
             'is_edi_order': True,
-            'name':data.get('order_no'),
+            'name': data.get('order_no'),
             'chnl_adv_order_id': data.get('order_no'),
-            'client_order_ref':  data.get('SiteOrderID'),
+            'client_order_ref': data.get('SiteOrderID'),
             'partner_shipping_id': delivery_address and delivery_address.id or Customer.id,  # 59,#
             'partner_invoice_id': Customer.id,  # 60,#
             'special_instruction': data.get('SpecialInstructions'),
             'private_note': data.get('PrivateNotes'),
             'total_price': data.get('TotalPrice'),
-            'date_order':data.get('date_order'),
+            'date_order': data.get('date_order'),
             #     # 'carrier_id': carrier and carrier.id or False,
             #     # 'note': notes,
         }
@@ -292,8 +292,7 @@ class TransactionLogger(models.Model):
             get_lines = self.process_line_item(data.get('lines').get(line), Customer)
             is_review_lst.append(get_lines.pop('is_review', False))
             line_vals.append((0, 0, get_lines))
-            promo_amt = promo_amt+ get_lines.pop('promo_amt', False)
-
+            promo_amt = promo_amt + get_lines.pop('promo_amt', False)
 
         pdt = self.env.user.company_id.shipping_cost_product_id
         # tax = self.env.user.company_id.tax_product_id
@@ -302,22 +301,24 @@ class TransactionLogger(models.Model):
         addt_cost = self.env.user.company_id.addt_cost_product_id
         insurance = self.env.user.company_id.insurance_product_id
         taxes = self.env['account.tax']
-        if pdt :
-            if data.get('TotalShippingTaxPrice') and  data.get('TotalShippingPrice', ''):
-                tax = round((( data.get('TotalShippingTaxPrice') /  data.get('TotalShippingPrice', '')) * 100), 2)
+        if pdt:
+            if data.get('TotalShippingTaxPrice') and data.get('TotalShippingPrice', ''):
+                tax = round(((data.get('TotalShippingTaxPrice') / data.get('TotalShippingPrice', '')) * 100), 2)
                 taxes = self.env['account.tax'].search([('amount', '=', tax), ('type_tax_use', '!=', 'purchase')])
                 if not taxes:
                     values = {'name': str(tax),
-                            'amount': tax
-                            }
+                              'amount': tax
+                              }
                     taxes = self.env['account.tax'].create(values)
-            line_vals.append((0, 0, {'product_id': pdt.id,'price_unit': data.get('TotalShippingPrice', 0),'name':pdt.name,'tax_id': [[6, False, taxes.ids or []]],}))
+            line_vals.append((0, 0,
+                              {'product_id': pdt.id, 'price_unit': data.get('TotalShippingPrice', 0), 'name': pdt.name,
+                               'tax_id': [[6, False, taxes.ids or []]], }))
         # if tax and data.get('TotalTaxPrice', 0) :
         #     line_vals.append(
         #         (0, 0, {'product_id': tax.id, 'price_unit': data.get('TotalTaxPrice', 0), 'name': tax.name}))
-        if gift and data.get('TotalGiftOptionPrice', 0) :
-            if data.get('TotalGiftOptionTaxPrice') :
-                tax = round((( data.get('TotalGiftOptionTaxPrice') /  data.get('TotalGiftOptionPrice', '')) * 100), 2)
+        if gift and data.get('TotalGiftOptionPrice', 0):
+            if data.get('TotalGiftOptionTaxPrice'):
+                tax = round(((data.get('TotalGiftOptionTaxPrice') / data.get('TotalGiftOptionPrice', '')) * 100), 2)
                 taxes = self.env['account.tax'].search([('amount', '=', tax), ('type_tax_use', '!=', 'purchase')])
                 if not taxes:
                     vals = {'name': str(tax),
@@ -325,33 +326,38 @@ class TransactionLogger(models.Model):
                             }
                     taxes = self.env['account.tax'].create(vals)
             line_vals.append(
-                (0, 0, {'product_id': gift.id, 'price_unit': data.get('TotalGiftOptionPrice', 0), 'name': gift.name,'tax_id': [[6, False, taxes.ids or []]],}))
-        if data.get('PromotionAmount', 0) or promo_amt and promo  :
+                (0, 0, {'product_id': gift.id, 'price_unit': data.get('TotalGiftOptionPrice', 0), 'name': gift.name,
+                        'tax_id': [[6, False, taxes.ids or []]], }))
+        if data.get('PromotionAmount', 0) or promo_amt and promo:
             price_unit = data.get('PromotionAmount', 0) + promo_amt
-            promo_name= data.get('PromotionCode', '') if data.get('PromotionCode', '') else  promo.name
+            promo_name = data.get('PromotionCode', '') if data.get('PromotionCode', '') else promo.name
             line_vals.append(
-                (0, 0, {'product_id': promo.id, 'price_unit': price_unit, 'name':promo_name }))
+                (0, 0, {'product_id': promo.id, 'price_unit': price_unit, 'name': promo_name}))
         if addt_cost and data.get('AdditionalCostOrDiscount', 0):
             line_vals.append(
-                (0, 0, {'product_id': addt_cost.id, 'price_unit': data.get('AdditionalCostOrDiscount', 0), 'name': addt_cost.name,'product_uom': 1,}))
+                (0, 0, {'product_id': addt_cost.id, 'price_unit': data.get('AdditionalCostOrDiscount', 0),
+                        'name': addt_cost.name, 'product_uom': 1, }))
         if insurance and data.get('TotalInsurancePrice', 0):
             line_vals.append(
-                (0, 0, {'product_id': insurance.id, 'price_unit': data.get('TotalInsurancePrice', 0), 'name': insurance.name,'product_uom': 1,}))
+                (0, 0,
+                 {'product_id': insurance.id, 'price_unit': data.get('TotalInsurancePrice', 0), 'name': insurance.name,
+                  'product_uom': 1, }))
         is_review = any(is_review_lst)
-        vals.update({'order_line':line_vals,'is_review':is_review})
+        vals.update({'order_line': line_vals, 'is_review': is_review})
         if data.get('DistributionCenterTypeRollup', '') == "ExternallyManaged" and data.get('DistributionCenterID'):
             vals.update({
                 'is_fba': True,
                 'warehouse_id': center_dict.get(str(data['DistributionCenterID']), False),
             })
-        SaleOrder = self.env ['sale.order']
+        SaleOrder = self.env['sale.order']
         saleorder = SaleOrder.search(
-            [('chnl_adv_order_id', '=', data.get('order_no')),('state', 'not in', ['cancel'])], limit=1)
+            [('chnl_adv_order_id', '=', data.get('order_no')), ('state', 'not in', ['cancel'])], limit=1)
 
         if not saleorder:
             saleorder = SaleOrder.create(vals)
 
-        if saleorder.state in ['draft', 'sent'] and Customer.name != 'Checkout Direct' and data.get('Paymentstatus') == 'Cleared':
+        if saleorder.state in ['draft', 'sent'] and Customer.name != 'Checkout Direct' and data.get(
+                'Paymentstatus') == 'Cleared':
             if Customer and Customer.ca_site_id == 640 and delivery_address:
                 saleorder.write({'partner_shipping_id': delivery_address.id})
             saleorder.action_confirm()
@@ -368,7 +374,8 @@ class TransactionLogger(models.Model):
         cr = self.env.cr
         imported_date = datetime.now() - timedelta(minutes=30)
         if self.env.context.get('from_cron'):
-            connector = self.env['ca.connector'].search([('state', '=', 'active'), ('auto_import_orders', '=', True)], limit=1)
+            connector = self.env['ca.connector'].search([('state', '=', 'active'), ('auto_import_orders', '=', True)],
+                                                        limit=1)
         else:
             connector = self.env['ca.connector'].search([('state', '=', 'active')], limit=1)
         if not connector:
@@ -377,17 +384,19 @@ class TransactionLogger(models.Model):
         date_filter = False
         if connector.orders_imported_date:
             last_imported_date = connector.orders_imported_date - timedelta(minutes=60)
-            date_filter = "CreatedDateUtc ge %s and CreatedDateUtc lt %s" % (last_imported_date.strftime("%Y-%m-%dT%H:%M:%SZ"), imported_date.strftime("%Y-%m-%dT%H:%M:%SZ"))
+            date_filter = "CreatedDateUtc ge %s and CreatedDateUtc lt %s" % (
+            last_imported_date.strftime("%Y-%m-%dT%H:%M:%SZ"), imported_date.strftime("%Y-%m-%dT%H:%M:%SZ"))
 
         res = connector.call('import_orders', filter=date_filter)
 
-        center_dict = {center.res_id: center.warehouse_id.id for center in self.env['ca.distribution.center'].search([])}
+        center_dict = {center.res_id: center.warehouse_id.id for center in
+                       self.env['ca.distribution.center'].search([])}
         for values in res.get('value', []):
             try:
                 vals = self._get_values(values) or {}
                 error_message = ''
                 try:
-                    SaleOrder = self.create_order(vals,center_dict)
+                    SaleOrder = self.create_order(vals, center_dict)
                     cr.commit()
 
                     # Creating and Validating Invoice
@@ -429,7 +438,6 @@ class TransactionLogger(models.Model):
             })
         cr.commit()
 
-
         return True
 
     @api.model
@@ -439,7 +447,7 @@ class TransactionLogger(models.Model):
             return False
 
         cr = self.env.cr
-        SaleOrder = self.env ['sale.order'].sudo()
+        SaleOrder = self.env['sale.order'].sudo()
         orders = SaleOrder.search([
             ('is_edi_order', '=', True),
             ('chnl_adv_order_id', '!=', False),
@@ -480,11 +488,13 @@ class TransactionLogger(models.Model):
 
         cr = self.env.cr
         SaleOrder = self.env['sale.order'].sudo()
-        dist_centers = {center.res_id: center.warehouse_id.id for center in self.env['ca.distribution.center'].search([])}
+        dist_centers = {center.res_id: center.warehouse_id.id for center in
+                        self.env['ca.distribution.center'].search([])}
 
         for rec in self:
             try:
-                sale_order = SaleOrder.search([('chnl_adv_order_id', '=', rec.name),('state', 'not in', ['cancel'])], limit=1)
+                sale_order = SaleOrder.search([('chnl_adv_order_id', '=', rec.name), ('state', 'not in', ['cancel'])],
+                                              limit=1)
                 if not sale_order:
                     res = connector.call('retrieve_order', order_id=rec.name)
                     vals = self._get_values(res) or {}
@@ -517,6 +527,4 @@ class TransactionLogger(models.Model):
             self._reimport()
         return True
 
-
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
-
