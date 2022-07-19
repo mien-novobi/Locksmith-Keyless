@@ -36,9 +36,13 @@ class PurchaseReportExport(http.Controller):
             domain += [('id', 'in', product_ids)]
 
         if report_filter.include_child:
-            domain += [('ca_product_type', 'in', ['Item', 'Parent', 'Child'])]
+            domain += [('ca_product_type', 'in', ['Item', 'Child'])]
+
+            # domain += [('ca_product_type', 'in', ['Item', 'Parent', 'Child'])]
         else:
-            domain += [('ca_product_type', 'in', ['Item', 'Parent'])]
+            # domain += [('ca_product_type', 'in', ['Item', 'Parent'])]
+            domain += [('ca_product_type', 'in', ['Item'])]
+
 
         data = []
         sales_sum = 0
