@@ -146,7 +146,7 @@ class ChannelAdvisorConnector(models.Model):
                 logging.info(resource_url)
                 res = requests.get(resource_url)
                 logging.info(res.status_code)
-                if not res.status_code not in [400, 401]:
+                if res.status_code not in [400, 401]:
                     data = res.json()
 
         elif method == "get_payment_status":
