@@ -136,7 +136,7 @@ class ProductTemplate(models.Model):
             connector = False
             profile_ids = []
             pdt = self.env['product.template'].search(
-                [('flag', '=', False), ('ca_product_type', '=', 'Bundle')], limit=250)
+                [('flag', '=', False), ('ca_product_type', '=', 'Bundle')], limit=500)
             for rec in pdt:
                 if rec.ca_profile_id not in profile_ids or not connector:
                     connector = self.env['ca.connector'].sudo().search(
@@ -150,6 +150,9 @@ class ProductTemplate(models.Model):
                     for vals in res.get('value', []):
                         product = Product.search([('ca_product_id', '=', vals.get('ComponentID')),
                                                   ('ca_profile_id', '=', vals.get('ProfileID'))], limit=1)
+                        logging.info("product")
+                        logging.info(product)
+
                         if product:
                             components.append((0, 0, {
                                 'product_id': product.id,
@@ -157,6 +160,7 @@ class ProductTemplate(models.Model):
                             }))
                     rec.write({'ca_bundle_product_ids': components})
                     rec.write({'flag': True})
+                    logging.info(rec.name)
                 cr.commit()
 
         Products = self.env['product.template'].search(
