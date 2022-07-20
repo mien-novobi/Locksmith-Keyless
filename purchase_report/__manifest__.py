@@ -18,6 +18,7 @@
     'website': 'https://www.confianzit.com',
     'depends':  ['purchase', 'channel_advisor'],
     'data': [
+        'data/mail_data.xml',
         'wizard/purchasing_report_view.xml',
         'views/purchase_views.xml',
     ],

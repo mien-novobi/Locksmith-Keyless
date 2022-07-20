@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <record id="po_report_email_template" model="mail.template">
+            <field name="name">Purchase Report</field>
+            <field name="model_id" ref="purchase_report.model_purchasing_report_filter"/>
+            <field name="subject">Purchase Report</field>
+            <field name="body_html" type="xml">
+                <div>
+                    Dear Jose,<br /><br />
+                        Please find the Purchase Report for this week attached herewith.
+                    <br /><br />
+                    This is an auto-generated email.<br />
+                    Please do not reply.<br /><br />
+                </div>
+            </field>
+            <field name="auto_delete" eval="False"/>
+        </record>
+        <record id="purchase_report_cron" model="ir.cron">
+            <field name="name">Purchase report</field>
+            <field name="model_id" ref="model_purchasing_report_filter" />
+            <field name="state">code</field>
+            <field name="code">model.scheduled_export_report_pd()</field>
+            <field name="user_id" ref="base.user_root" />
+            <field name="interval_number">1</field>
+            <field name="interval_type">week</field>
+            <field name="numbercall">-1</field>
+            <field name="doall" eval="False" />
+        </record>
+    </data>
+</odoo>
