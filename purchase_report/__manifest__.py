@@ -16,7 +16,7 @@
     """,
     'author': 'Confianz IT',
     'website': 'https://www.confianzit.com',
-    'depends':  ['purchase', 'channel_advisor'],
+    'depends':  ['mail','purchase', 'channel_advisor'],
     'data': [
         'data/mail_data.xml',
         'wizard/purchasing_report_view.xml',
