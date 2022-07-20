@@ -12,11 +12,11 @@
     'version': '13.0.1.0',
     'category': "Reports",
     'description': """
-        This module will helps to print customised purchase report.
-    """,
+           This module will helps to print customised purchase report.
+       """,
     'author': 'Confianz IT',
     'website': 'https://www.confianzit.com',
-    'depends':  ['mail','purchase', 'channel_advisor'],
+    'depends': ['purchase','mail', 'channel_advisor'],
     'data': [
         'data/mail_data.xml',
         'wizard/purchasing_report_view.xml',
