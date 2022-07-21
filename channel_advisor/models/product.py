@@ -140,6 +140,9 @@ class ProductTemplate(models.Model):
         loaded = False
         if bundle_products:
             for each in bundle_products:
+                logging.info("each")
+                logging.info(each)
+
                 if each.ca_profile_id not in profile_ids or not connector:
                     connector = self.env['ca.connector'].sudo().search(
                         [('ca_account_ids.account_id', '=', each.ca_profile_id)], limit=1)
