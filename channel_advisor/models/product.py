@@ -132,7 +132,7 @@ class ProductTemplate(models.Model):
     def update_components_cron(self):
         Product = self.env['product.product']
         bundle_products = self.env['product.template'].search(
-            [('ca_product_type', '=', 'Bundle'), ('ca_profile_id', '!=', False)],limit=1000)
+            [('ca_product_type', '=', 'Bundle'), ('ca_profile_id', '!=', False)],limit=250)
         updated = False
         connector = False
         profile_ids = []
