@@ -129,45 +129,37 @@ class ProductTemplate(models.Model):
         return True
 
     def update_components_cron(self):
-        cr = self.env.cr
-        while self.env['product.template'].search_count(
-                [('flag', '=', False), ('ca_product_type', '=', 'Bundle')]) > 0:
-            Product = self.env['product.product']
-            connector = False
-            profile_ids = []
-            pdt = self.env['product.template'].search(
-                [('flag', '=', False), ('ca_product_type', '=', 'Bundle')], limit=500)
-            for rec in pdt:
-                if rec.ca_profile_id not in profile_ids or not connector:
+        Product = self.env['product.product']
+        bundle_products = self.env['product.template'].search(
+            [('ca_product_type', '=', 'Bundle'), ('ca_profile_id', '!=', False)])
+        updated = False
+        connector = False
+        profile_ids = []
+        Product = self.env['product.product']
+        loaded = False
+        if bundle_products:
+            for each in bundle_products:
+                if each.ca_profile_id not in profile_ids or not connector:
                     connector = self.env['ca.connector'].sudo().search(
-                        [('ca_account_ids.account_id', '=', rec.ca_profile_id)], limit=1)
+                        [('ca_account_ids.account_id', '=', each.ca_profile_id)], limit=1)
                     profile_ids = connector.ca_account_ids.mapped('account_id')
-
-                if connector:
-
-                    res = connector.call('retrieve_bundle_components', bundle_id=rec.ca_product_id)
+                if connector and not (loaded):
+                    res = connector.call('retrieve_all_bundle_components')
+                    df = pd.DataFrame(res['value'])
+                    loaded = True
+                if not df.empty and connector:
                     components = [(5, 0, 0)]
-                    for vals in res.get('value', []):
-                        product = Product.search([('ca_product_id', '=', vals.get('ComponentID')),
-                                                  ('ca_profile_id', '=', vals.get('ProfileID'))], limit=1)
-                        logging.info("product")
-                        logging.info(product)
-
-                        if product:
-                            components.append((0, 0, {
-                                'product_id': product.id,
-                                'quantity': vals.get('Quantity', 0),
-                            }))
-                    rec.write({'ca_bundle_product_ids': components})
-                    rec.write({'flag': True})
-                    logging.info(rec.name)
-                cr.commit()
-
-        Products = self.env['product.template'].search(
-            [('flag', '=', True)])
-        for prod in Products:
-            prod.write({'flag': False})
-        return True
+                    sliced_df = df.loc[df['ProductID'] == int(each.ca_product_id)]
+                    for ind in sliced_df.index:
+                        product = Product.search([('ca_product_id', '=', sliced_df['ComponentID'][ind]),
+                                                  ('ca_profile_id', '=', sliced_df['ProfileID'][ind])], limit=1)
+                        components.append((0, 0, {
+                            'product_id': product.id,
+                            'quantity': sliced_df['Quantity'][ind],
+                        }))
+                    each.write({
+                        'ca_bundle_product_ids': components,
+                    })
 
     def ca_update_quantity(self):
         self.mapped('product_variant_id').ca_update_quantity()
