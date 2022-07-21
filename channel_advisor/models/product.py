@@ -13,7 +13,7 @@ from xml.dom import minidom
 import xml.etree.ElementTree as ET
 import logging
 import pandas as pd
-
+from datetime import datetime, timedelta
 
 
 class CustomerProduct(models.Model):
@@ -38,6 +38,10 @@ class CustomerProduct(models.Model):
 
 class ProductTemplate(models.Model):
     _inherit = "product.template"
+
+    def _default_yesterday_date(self):
+
+        return fields.Date.to_string(datetime.now() - timedelta(1))
 
     customer_product_value_ids = fields.One2many('customer.product.values', 'product_id', string='Customer Reference')
     product_customer_sku = fields.Char(related='customer_product_value_ids.customer_sku', string='Customer SKU')
@@ -71,6 +75,8 @@ class ProductTemplate(models.Model):
     ], string="Condition")
     ca_manufacturer = fields.Char(string="Manufacturer")
     flag = fields.Boolean(string="flag?", default=False)
+    last_updated_date = fields.Date(string='last updated date cron', readonly=True, copy=False,
+                                    default=_default_yesterday_date)
 
     @api.depends()
     def _compute_free_qty(self):
@@ -132,7 +138,8 @@ class ProductTemplate(models.Model):
     def update_components_cron(self):
         Product = self.env['product.product']
         bundle_products = self.env['product.template'].search(
-            [('ca_product_type', '=', 'Bundle'), ('ca_profile_id', '!=', False)],limit=150)
+            [('ca_product_type', '=', 'Bundle'), ('ca_profile_id', '!=', False),
+             ('last_updated_date', '<', datetime.now())], limit=150)
         updated = False
         connector = False
         profile_ids = []
@@ -149,6 +156,7 @@ class ProductTemplate(models.Model):
                     profile_ids = connector.ca_account_ids.mapped('account_id')
                 if connector and not (loaded):
                     res = connector.call('retrieve_all_bundle_components')
+                    logging.info(res)
                     df = pd.DataFrame(res['value'])
                     loaded = True
                 if not df.empty and connector:
@@ -163,6 +171,7 @@ class ProductTemplate(models.Model):
                         }))
                     each.write({
                         'ca_bundle_product_ids': components,
+                        'last_updated_date': datetime.now(),
                     })
         return True
 
