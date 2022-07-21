@@ -12,6 +12,7 @@ from xml.etree import ElementTree
 from xml.dom import minidom
 import xml.etree.ElementTree as ET
 import logging
+import pandas as pd
 
 
 
@@ -160,6 +161,7 @@ class ProductTemplate(models.Model):
                     each.write({
                         'ca_bundle_product_ids': components,
                     })
+        return True
 
     def ca_update_quantity(self):
         self.mapped('product_variant_id').ca_update_quantity()
