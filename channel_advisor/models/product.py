@@ -132,6 +132,7 @@ class ProductTemplate(models.Model):
                             'product_id': product.id,
                             'quantity': vals.get('Quantity', 0),
                         }))
+                        logging.info("component",component)
                 rec.write({'ca_bundle_product_ids': components})
         return True
 
@@ -139,7 +140,7 @@ class ProductTemplate(models.Model):
         Product = self.env['product.product']
         bundle_products = self.env['product.template'].search(
             [('ca_product_type', '=', 'Bundle'), ('ca_profile_id', '!=', False),
-             ('last_updated_date', '<', datetime.now())], limit=150)
+             ('last_updated_date', '<', datetime.now())], limit=100)
         updated = False
         connector = False
         profile_ids = []
@@ -147,32 +148,33 @@ class ProductTemplate(models.Model):
         loaded = False
         if bundle_products:
             for each in bundle_products:
-                logging.info("each")
-                logging.info(each)
+                each.action_update_components()
+                each.write({
+                    'last_updated_date': datetime.now(),
+                })
+                # logging.info("each")
+                # logging.info(each)
+                #
+                # if each.ca_profile_id not in profile_ids or not connector:
+                #     connector = self.env['ca.connector'].sudo().search(
+                #         [('ca_account_ids.account_id', '=', each.ca_profile_id)], limit=1)
+                #     profile_ids = connector.ca_account_ids.mapped('account_id')
+                # if connector and not (loaded):
+                #     res = connector.call('retrieve_all_bundle_components')
+                #     logging.info(res)
+                #     df = pd.DataFrame(res['value'])
+                #     loaded = True
+                # if not df.empty and connector:
+                #     components = [(5, 0, 0)]
+                #     sliced_df = df.loc[df['ProductID'] == int(each.ca_product_id)]
+                #     for ind in sliced_df.index:
+                #         product = Product.search([('ca_product_id', '=', sliced_df['ComponentID'][ind]),
+                #                                   ('ca_profile_id', '=', sliced_df['ProfileID'][ind])], limit=1)
+                #         components.append((0, 0, {
+                #             'product_id': product.id,
+                #             'quantity': sliced_df['Quantity'][ind],
+                #         }))
 
-                if each.ca_profile_id not in profile_ids or not connector:
-                    connector = self.env['ca.connector'].sudo().search(
-                        [('ca_account_ids.account_id', '=', each.ca_profile_id)], limit=1)
-                    profile_ids = connector.ca_account_ids.mapped('account_id')
-                if connector and not (loaded):
-                    res = connector.call('retrieve_all_bundle_components')
-                    logging.info(res)
-                    df = pd.DataFrame(res['value'])
-                    loaded = True
-                if not df.empty and connector:
-                    components = [(5, 0, 0)]
-                    sliced_df = df.loc[df['ProductID'] == int(each.ca_product_id)]
-                    for ind in sliced_df.index:
-                        product = Product.search([('ca_product_id', '=', sliced_df['ComponentID'][ind]),
-                                                  ('ca_profile_id', '=', sliced_df['ProfileID'][ind])], limit=1)
-                        components.append((0, 0, {
-                            'product_id': product.id,
-                            'quantity': sliced_df['Quantity'][ind],
-                        }))
-                    each.write({
-                        'ca_bundle_product_ids': components,
-                        'last_updated_date': datetime.now(),
-                    })
         return True
 
     def ca_update_quantity(self):
