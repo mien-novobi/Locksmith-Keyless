@@ -132,7 +132,7 @@ class ProductTemplate(models.Model):
                             'product_id': product.id,
                             'quantity': vals.get('Quantity', 0),
                         }))
-                        logging.info("component",component)
+                        logging.info("component",components)
                 rec.write({'ca_bundle_product_ids': components})
         return True
 
