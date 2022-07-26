@@ -46,7 +46,8 @@ class PurchasingReportFilter(models.TransientModel):
             headers.insert(9 + i, date_start.strftime('%b-%y'))
             domain_dates[date_start.strftime('%B %Y')] = 9 + i
 
-        domain = [('type', '=', 'product'), ('purchase_ok', '=', True), ('ca_bundle_product_ids', '=', False)]
+        domain = [('type', '=', 'product'), ('purchase_ok', '=', True), ('ca_bundle_product_ids', '=', False),
+                  ('ca_product_type', 'in', ['Item', 'Child'])]
         if self.categ_id:
             domain += [('categ_id', '=', self.categ_id.id)]
 
@@ -56,13 +57,13 @@ class PurchasingReportFilter(models.TransientModel):
                 'order_line.product_id').ids
             domain += [('id', 'in', product_ids)]
 
-        if self.include_child:
-            # domain += [('ca_product_type', 'in', ['Item', 'Parent', 'Child'])]
-            domain += [('ca_product_type', 'in', ['Item', 'Child'])]
-
-        else:
-            # domain += [('ca_product_type', 'in', ['Item', 'Parent'])]
-            domain += [('ca_product_type', 'in', ['Item'])]
+        # if self.include_child:
+        #     # domain += [('ca_product_type', 'in', ['Item', 'Parent', 'Child'])]
+        #     domain += [('ca_product_type', 'in', ['Item', 'Child'])]
+        #
+        # else:
+        # domain += [('ca_product_type', 'in', ['Item', 'Parent'])]
+        # domain += [('ca_product_type', 'in', ['Item'])]
 
         data = []
         sales_sum = 0
@@ -90,7 +91,7 @@ class PurchasingReportFilter(models.TransientModel):
         product_ids = (x.id for x in products)
         tz = self.env.user.tz and self.env.user.tz or "America/New_York"
         self.env.cr.execute(query, (
-        tz, tuple(product_ids), tz, from_date.strftime('%Y-%m-%d'), tz, today.strftime('%Y-%m-%d')))
+            tz, tuple(product_ids), tz, from_date.strftime('%Y-%m-%d'), tz, today.strftime('%Y-%m-%d')))
         qdata = self.env.cr.dictfetchall()
         df = pd.DataFrame(qdata)
         df.set_index(['product_id', 'month'], inplace=True)
