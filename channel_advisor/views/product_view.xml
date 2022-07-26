@@ -45,7 +45,7 @@
                                 <field name="ca_condition" readonly="1" />
                                 <field name="is_kit" />
                                 <field name="flag"  invisible ="1"/>
-                                <field name="last_updated_date"  invisible ="0"/>
+                                <field name="last_updated_date"  invisible ="1"/>
 
 
                             </group>

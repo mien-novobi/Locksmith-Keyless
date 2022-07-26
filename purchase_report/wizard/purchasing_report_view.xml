@@ -13,7 +13,7 @@
                         </group>
                         <group>
                             <field name="partner_id" domain="[('supplier_rank', '&gt;', 0)]" />
-                            <field name="include_child" string="Show Parent + Child Sku" />
+                            <field name="include_child" string="Show Child Sku" />
                         </group>
                     </group>
                 </sheet>
