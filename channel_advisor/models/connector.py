@@ -152,6 +152,7 @@ class ChannelAdvisorConnector(models.Model):
                 resource_url = self.base_url + "/v1/Products(%s)/BundleComponents?access_token=%s" % (
                     kwargs['bundle_id'], self._access_token())
                 res = requests.get(resource_url)
+                logging.info(res.status_code)
                 if not res.status_code in [400, 401]:
                     data = res.json()
 
