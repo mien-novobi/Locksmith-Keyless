@@ -7,6 +7,8 @@ from datetime import datetime, timedelta
 
 from odoo import api, fields, models
 import logging
+
+
 class ChannelAdvisorConnector(models.Model):
     _name = "ca.connector"
     _description = "Channel Advisor Connector"
@@ -63,7 +65,7 @@ class ChannelAdvisorConnector(models.Model):
                 resource_url += "&$filter=%s" % kwargs['filter']
 
             if kwargs.get('select'):
-                resource_url += "&$select=%s" %  ','.join(kwargs['select'])
+                resource_url += "&$select=%s" % ','.join(kwargs['select'])
 
             if self.product_import_nextlink:
                 resource_url += "&$skip=%s" % self.product_import_nextlink
@@ -82,14 +84,16 @@ class ChannelAdvisorConnector(models.Model):
 
         elif method == "retrieve_order":
             if kwargs.get('order_id'):
-                resource_url = self.base_url + "/v1/Orders(%s)?access_token=%s&$expand=Items($expand=Promotions),Fulfillments" % (kwargs.get('order_id'), self._access_token())
+                resource_url = self.base_url + "/v1/Orders(%s)?access_token=%s&$expand=Items($expand=Promotions),Fulfillments" % (
+                    kwargs.get('order_id'), self._access_token())
                 res = requests.get(resource_url)
                 data = res.json()
 
         elif method == "update_quantity":
             if kwargs.get('product_id') and kwargs.get('vals'):
                 header = {'Content-Type': 'application/json'}
-                resource_url = self.base_url + "/v1/Products(%s)/UpdateQuantity?access_token=%s" % (kwargs['product_id'], self._access_token())
+                resource_url = self.base_url + "/v1/Products(%s)/UpdateQuantity?access_token=%s" % (
+                    kwargs['product_id'], self._access_token())
                 res = requests.post(resource_url, headers=header, json=kwargs['vals'])
                 # There is nothing to return
 
@@ -97,23 +101,26 @@ class ChannelAdvisorConnector(models.Model):
             batch_data = kwargs.get('batch_data', {})
             data = []
             for i, product_id in enumerate(batch_data):
-                data.append("--changeset\nContent-Type: application/http\nContent-Transfer-Encoding: binary\nContent-ID: %(content_id)d\n\nPOST %(resource_url)s HTTP/1.1\nContent-Type: application/json\n\n%(values)s" % {
-                    'content_id': i + 1,
-                    'resource_url': self.base_url + "/V1/Products(%s)/UpdateQuantity" % (product_id),
-                    'values': json.dumps(batch_data[product_id], indent=4),
-                })
+                data.append(
+                    "--changeset\nContent-Type: application/http\nContent-Transfer-Encoding: binary\nContent-ID: %(content_id)d\n\nPOST %(resource_url)s HTTP/1.1\nContent-Type: application/json\n\n%(values)s" % {
+                        'content_id': i + 1,
+                        'resource_url': self.base_url + "/V1/Products(%s)/UpdateQuantity" % (product_id),
+                        'values': json.dumps(batch_data[product_id], indent=4),
+                    })
 
             if data:
                 header = {'Content-Type': 'multipart/mixed; boundary=changeset'}
                 request_url = self.base_url + "/v1/$batch?access_token=%s" % (self._access_token())
-                body = "--batch Content-Type: multipart/mixed; boundary=changeset\n%(data)s\n--changeset--\n--batch--" % {'data': '\n'.join(data)}
+                body = "--batch Content-Type: multipart/mixed; boundary=changeset\n%(data)s\n--changeset--\n--batch--" % {
+                    'data': '\n'.join(data)}
                 res = requests.post(request_url, headers=header, data=body)
                 # There is nothing to return
 
         elif method == "update_price":
             if kwargs.get('product_id') and kwargs.get('vals'):
                 header = {'Content-Type': 'application/json'}
-                resource_url = self.base_url + "/v1/Products(%s)?access_token=%s" % (kwargs['product_id'], self._access_token())
+                resource_url = self.base_url + "/v1/Products(%s)?access_token=%s" % (
+                    kwargs['product_id'], self._access_token())
                 res = requests.put(resource_url, headers=header, json=kwargs['vals'])
                 # There is nothing to return
 
@@ -143,19 +150,20 @@ class ChannelAdvisorConnector(models.Model):
         elif method == "retrieve_bundle_components":
             if kwargs.get('bundle_id'):
                 resource_url = self.base_url + "/v1/Products(%s)/BundleComponents?access_token=%s" % (
-                kwargs['bundle_id'], self._access_token())
+                    kwargs['bundle_id'], self._access_token())
                 res = requests.get(resource_url)
-                data = res.json()
+                if not res.status_code in [400, 401]:
+                    data = res.json()
 
         elif method == "retrieve_all_bundle_components":
             resource_url = self.base_url + "/v1/ProductBundleComponents?access_token=%s" % (self._access_token())
             res = requests.get(resource_url)
-            if not  res.status_code in [400, 401]:
-                data = res.json()
+
 
         elif method == "get_payment_status":
             if kwargs.get('order_id'):
-                resource_url = self.base_url + "/v1/Orders(%s)?access_token=%s&$select=PaymentStatus,CreatedDateUtc" % (kwargs['order_id'], self._access_token())
+                resource_url = self.base_url + "/v1/Orders(%s)?access_token=%s&$select=PaymentStatus,CreatedDateUtc" % (
+                    kwargs['order_id'], self._access_token())
                 res = requests.get(resource_url)
                 data = res.json()
 
@@ -267,9 +275,11 @@ class ChannelAdvisorConnector(models.Model):
                         'ca_manufacturer': values.get('Manufacturer') or '',
                         'is_kit': True if values.get('ProductType') == 'Bundle' else False,
                     }
-                    product = Product.search([('ca_product_id', '=', values.get('ID')), ('ca_profile_id', '=', values.get('ProfileID'))])
+                    product = Product.search(
+                        [('ca_product_id', '=', values.get('ID')), ('ca_profile_id', '=', values.get('ProfileID'))])
                     if not product:
-                        product = Product.search([('default_code', '=', values.get('Sku')), ('ca_product_id', '=', False)])
+                        product = Product.search(
+                            [('default_code', '=', values.get('Sku')), ('ca_product_id', '=', False)])
 
                     if not product.image_1920 and values.get('Images'):
                         img_url = values['Images'][0].get('Url')
@@ -299,7 +309,8 @@ class ChannelAdvisorConnector(models.Model):
                 cr.commit()
 
     def _cron_update_quantity(self, limit=80):
-        dist_centers = self.env['ca.distribution.center'].search([('type', '=', 'Warehouse'), ('warehouse_id', '!=', False)])
+        dist_centers = self.env['ca.distribution.center'].search(
+            [('type', '=', 'Warehouse'), ('warehouse_id', '!=', False)])
         if not dist_centers:
             return
 
@@ -373,7 +384,8 @@ class ChannelAdvisorConnector(models.Model):
         self.ensure_one()
         UpdateQueue = self.env['ca.update.queue']
 
-        products = self.env['product.product'].search([('ca_product_type', 'in', ['Item', 'Child']), ('ca_product_id', '!=', False)])
+        products = self.env['product.product'].search(
+            [('ca_product_type', 'in', ['Item', 'Child']), ('ca_product_id', '!=', False)])
         queued_items = UpdateQueue.search([('update_type', '=', 'quantity')]).mapped('product_id')
         products_to_update = products - queued_items
 
@@ -385,6 +397,5 @@ class ChannelAdvisorConnector(models.Model):
 
         UpdateQueue._cron_process_update_queue()
         return True
-
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
