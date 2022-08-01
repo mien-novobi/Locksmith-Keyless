@@ -153,7 +153,7 @@ class ChannelAdvisorConnector(models.Model):
                     kwargs['bundle_id'], self._access_token())
                 res = requests.get(resource_url)
                 logging.info(res.status_code)
-                if not res.status_code in [400, 401]:
+                if res.status_code in [200, 201]:
                     data = res.json()
 
         elif method == "retrieve_all_bundle_components":
