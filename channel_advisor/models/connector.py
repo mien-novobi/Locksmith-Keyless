@@ -150,7 +150,8 @@ class ChannelAdvisorConnector(models.Model):
         elif method == "retrieve_all_bundle_components":
             resource_url = self.base_url + "/v1/ProductBundleComponents?access_token=%s" % (self._access_token())
             res = requests.get(resource_url)
-            data = res.json()
+            if not  res.status_code in [400, 401]:
+                data = res.json()
 
         elif method == "get_payment_status":
             if kwargs.get('order_id'):
