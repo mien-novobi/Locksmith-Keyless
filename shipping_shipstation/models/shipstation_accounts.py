@@ -13,7 +13,7 @@ from requests.auth import HTTPBasicAuth
 from odoo import api, fields, models, _
 from odoo.exceptions import ValidationError, UserError
 from dateutil import parser
-
+from odoo.http import request
 
 SHIPSTATION_ENDPOINT = "https://ssapi.shipstation.com/"
 
