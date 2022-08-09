@@ -182,9 +182,13 @@ class ShipstationAccounts(models.Model):
                                auth=HTTPBasicAuth(self.api_key, self.api_secret), headers=headers)
             if res.ok:
                 order_data = res.json().get('orders', [])
+                logging.info("^^^^^^^^^^^^^")
+                logging.info(order_data)
+
                 for vals in order_data:
                     if not ShipstationOrder.search([('order_id', '=', vals.get('orderId'))]) and \
                             vals.get('advancedOptions').get('source') != "Odoo Sales":
+                        logging.info("##################################")
                         shipping_order = ShipstationOrder.create({
                             'order_id': vals.get('orderId'),
                             'order_key': vals.get('orderKey'),
@@ -192,6 +196,7 @@ class ShipstationAccounts(models.Model):
                             'order_number': vals.get('orderNumber'),
                             'account_id': self.id,
                         })
+                        logging.info(shipping_order)
                         if shipping_order:
                             shipping_order.update_status()
 
