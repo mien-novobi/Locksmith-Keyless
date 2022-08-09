@@ -9,8 +9,10 @@ from datetime import datetime
 from email.utils import formataddr
 from requests.auth import HTTPBasicAuth
 
+
 from odoo import api, fields, models, _
 from odoo.exceptions import ValidationError, UserError
+from dateutil import parser
 
 
 SHIPSTATION_ENDPOINT = "https://ssapi.shipstation.com/"
@@ -170,5 +172,31 @@ class ShipstationAccounts(models.Model):
                 template.with_context(ctx).send_mail(account.id, force_send=True)
         return True
 
+    def import_onhold_order(self):
+        # This method will import all orders that are on hold but not captured in order create webhooks
+        # This can be used if odoo server was down while channel advisor orders are placed in shipstation
+        try:
+            ShipstationOrder = requests.env['shipstation.order'].sudo()
+            headers = {'Content-Type': 'application/json'}
+            res = requests.get("http://ssapi.shipstation.com/orders?orderStatus=on_hold",
+                               auth=HTTPBasicAuth(self.api_key, self.api_secret), headers=headers)
+            if res.ok:
+                order_data = res.json().get('orders', [])
+                for vals in order_data:
+                    if not ShipstationOrder.search([('order_id', '=', vals.get('orderId'))]) and \
+                            vals.get('advancedOptions').get('source') != "Odoo Sales":
+                        shipping_order = ShipstationOrder.create({
+                            'order_id': vals.get('orderId'),
+                            'order_key': vals.get('orderKey'),
+                            'order_date': parser.parse(vals.get('orderDate')).strftime("%Y-%m-%d %H:%M:%S"),
+                            'order_number': vals.get('orderNumber'),
+                            'account_id': self.id,
+                        })
+                        if shipping_order:
+                            shipping_order.update_status()
 
+        except Exception as e:
+            logging.error(str(e))
+
+        return True
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

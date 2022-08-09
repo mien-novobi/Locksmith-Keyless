@@ -78,6 +78,7 @@
                         <page name="other_info" string="Other Information">
                             <group>
                                 <field name="order_imported_as_on_date" />
+                                <button name="import_onhold_order" string="Import onhold orders" type="object"  class="btn-link" />
                             </group>
                         </page>
                         <page name="webhook_configuration" string="Webhook Information">
