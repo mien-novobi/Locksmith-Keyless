@@ -176,7 +176,11 @@ class ShipstationAccounts(models.Model):
         # This method will import all orders that are on hold but not captured in order create webhooks
         # This can be used if odoo server was down while channel advisor orders are placed in shipstation
         try:
+            logging.info("^^^^^^import_onhold_order^^^^^^^")
             ShipstationOrder = requests.env['shipstation.order'].sudo()
+
+            logging.info(ShipstationOrder)
+
             headers = {'Content-Type': 'application/json'}
             res = requests.get("http://ssapi.shipstation.com/orders?orderStatus=on_hold",
                                auth=HTTPBasicAuth(self.api_key, self.api_secret), headers=headers)
