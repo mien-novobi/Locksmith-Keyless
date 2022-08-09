@@ -4,6 +4,7 @@ import json
 import threading
 
 from odoo import api, fields, models, registry, _
+import logging
 
 
 class StockPicking(models.Model):
@@ -91,6 +92,8 @@ class StockPicking(models.Model):
         return res
 
     def prepare_shipstation_data(self, operation='create'):
+        logging.info("^^^^^^^^^^^inside prepare_shipstation_data^^^^^^^^^")
+
         values = {}
         for picking in self:
             item_list = []
@@ -159,6 +162,7 @@ class StockPicking(models.Model):
                 if operation == 'update':
                     if picking.shipstation_order_key:
                         values.update({'orderKey': picking.shipstation_order_key})
+        logging.info("^^^^^^^^^^^inside prepare_shipstation_data before return^^^^^^^^^")
         return values
 
     # def write(self, vals):
@@ -241,23 +245,36 @@ class StockPicking(models.Model):
                     data['orderId'] = shipping_order.order_id
                     shipstation_account = shipping_order.account_id
             if shipstation_account and data:
+                logging.info("#################before new cr################3")
                 # res = shipstation_account._send_request('orders/restorefromhold', data, method="POST")
                 new_cr = registry(self.env.cr.dbname).cursor()
+                logging.info("#################after new cr################3")
+
                 with api.Environment.manage():
                     new_env = api.Environment(new_cr, self.env.uid, self.env.context)
                     shipstation_account = shipstation_account.with_env(new_env)
                     thread = threading.Thread(target=shipstation_account._send_request, args=('orders/restorefromhold', data, 'POST'))
                     thread.daemon = True
+                    logging.info("#################before thread################3")
+
                     thread.start()
+                    logging.info("#################after thread################3")
+
         return True
 
     def action_done(self):
         self.ensure_one()
+        logging.info("^^^^^^^^^^^action_done start^^^^^^^^^^")
         res = super(StockPicking, self).action_done()
+        logging.info("^^^^^^^^^^^action_done after super^^^^^^^^^")
         if self.state == 'done' and self.picking_type_id.code == 'outgoing':
             if (self.shipstation_order_id and self.is_shipstation_order) or (self.use_shipstation and self.is_shipstation_order):
                 shipment_values = self.prepare_shipstation_data(operation='update')
+                logging.info("^^^^^^^^^^^action_done after shipment_values^^^^^^^^^")
+
                 response = self.shipstation_store_id.account_id._send_request('orders/createorder', shipment_values, method="POST")
+                logging.info("^^^^^^^^^^^action_done after response^^^^^^^^^")
+
                 if response.get('orderId'):
                     self.write({
                         'shipstation_order_id': response.get('orderId'),
@@ -268,7 +285,10 @@ class StockPicking(models.Model):
                         'shipstation_order_id': response.get('orderId'),
                         'shipstation_order_key': response.get('orderKey'),
                     })
+            logging.info("^^^^^^^^^^^action_done before restore_from_hold^^^^^^^^^")
             self.restore_from_hold()
+            logging.info("^^^^^^^^^^^action_done after restore_from_hold^^^^^^^^^")
+
         return res
 
 
