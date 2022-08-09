@@ -177,7 +177,7 @@ class ShipstationAccounts(models.Model):
         # This can be used if odoo server was down while channel advisor orders are placed in shipstation
         try:
             logging.info("^^^^^^import_onhold_order^^^^^^^")
-            ShipstationOrder = requests.env['shipstation.order'].sudo()
+            ShipstationOrder = request.env['shipstation.order'].sudo()
 
             logging.info(ShipstationOrder)
 
