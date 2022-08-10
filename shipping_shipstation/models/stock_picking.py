@@ -256,7 +256,6 @@ class StockPicking(models.Model):
                     thread = threading.Thread(target=shipstation_account._send_request, args=('orders/restorefromhold', data, 'POST'))
                     thread.daemon = True
                     logging.info("#################before thread################3")
-
                     thread.start()
                     logging.info("#################after thread################3")
 
@@ -288,6 +287,7 @@ class StockPicking(models.Model):
             logging.info("^^^^^^^^^^^action_done before restore_from_hold^^^^^^^^^")
             self.restore_from_hold()
             logging.info("^^^^^^^^^^^action_done after restore_from_hold^^^^^^^^^")
+            logging.info(self.name)
 
         return res
 
