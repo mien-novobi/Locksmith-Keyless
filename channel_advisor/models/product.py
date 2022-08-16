@@ -301,14 +301,26 @@ class ProductProduct(models.Model):
             connector.call('update_quantity', product_id=product.ca_product_id, vals=vals)
 
     def write(self, vals):
+        for product in self:
+            cost_price = product.standard_price
+            logging.info("cost_pricecost_price")
+            logging.info(cost_price)
         res = super(ProductProduct, self).write(vals)
 
         if 'standard_price' in vals:
             for product in self:
+                if cost_price == product.standard_price:
+                    logging.info("^^^^^^^^^^^^^^ifffffffffffffffcost_pricefffffffffwrite^")
+                    logging.info(cost_price)
+                    logging.info("^^^^^^^^^^^^^^ifffffffffffffffproduct.standard_pricefffffffffwrite^")
+                    logging.info(product.standard_price)
+                    return res
                 if not product.is_kit:
+                    logging.info("kittttttttttttttttttttttttttttttttt")
                     product.ca_bundle_ids.mapped('bundle_id').update_bundle_price()
 
             if not self._context.get('ca_import', False):
+                logging.info("ca calllllllll")
                 apps = self.env['ca.connector'].sudo().search(
                     [('state', '=', 'active'), ('auto_update_cost', '=', True)])
                 for app in apps:
