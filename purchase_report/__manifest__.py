@@ -21,6 +21,7 @@
         'data/mail_data.xml',
         'wizard/purchasing_report_view.xml',
         'views/purchase_views.xml',
+        'views/stock_view.xml',
     ],
     'installable': True,
     'auto_install': False,

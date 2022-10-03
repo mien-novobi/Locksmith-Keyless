@@ -79,6 +79,8 @@ class PurchasingReportFilter(models.TransientModel):
 	            sm.product_id in %s 
 	            and 
 	            spt.code='outgoing' 
+	            or
+	            spt.is_drop_shipping = 't'
 	            and 
 	            sm.state='done' 
 	            and 
