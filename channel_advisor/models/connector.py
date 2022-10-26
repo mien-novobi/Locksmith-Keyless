@@ -290,9 +290,16 @@ class ChannelAdvisorConnector(models.Model):
                             vals['image_1920'] = base64.b64encode(img_data.content)
 
                     if product:
+                        if values.get('Brand') == 'Extend':
+                            vals['type'] = 'service'
+                        else:
+                            vals['type'] = 'product'
                         product.with_context(ca_import=True).write(vals)
                     else:
-                        vals['type'] = 'product'
+                        if values.get('Brand') == 'Extend':
+                            vals['type'] = 'service'
+                        else:
+                            vals['type'] = 'product'
                         Product.with_context(ca_import=True).create(vals)
                     cr.commit()
                 except Exception as e:
