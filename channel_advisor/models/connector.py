@@ -39,6 +39,7 @@ class ChannelAdvisorConnector(models.Model):
     auto_update_price = fields.Boolean(string="Auto Update Price?", default=False)
     auto_update_cost = fields.Boolean(string="Auto Update Cost?", default=False)
     default_journal_id = fields.Many2one('account.journal', string="Default Payment Journal")
+    ca_order_id = fields.Char(string='Order ID')
 
     @api.depends('application_id', 'shared_secret')
     def _compute_client_id(self):
@@ -388,6 +389,13 @@ class ChannelAdvisorConnector(models.Model):
     def action_reset(self):
         self.ensure_one()
         self.state = 'draft'
+
+    def import_order_manually(self):
+        if not self.ca_order_id:
+            raise UserError("Please Enter the CA Order Id.")
+        apps = self.search([('state', '=', 'active')])
+        if apps:
+            apps.env['transaction.log'].import_ca_order_manually(self.ca_order_id)
 
     def action_update_quantity(self):
         self.ensure_one()

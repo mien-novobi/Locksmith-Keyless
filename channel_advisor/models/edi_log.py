@@ -143,10 +143,14 @@ class TransactionLogger(models.Model):
         phone = address.get('PhoneNumberDay', '')
         domain = [('active', '=', True)]
 
-        if email:
+        if email :
             domain += [('email', '=', email)]
+            if zip_code:
+                domain.append(('zip', '=', zip_code))
         elif phone:
             domain += [('phone', '=', phone)]
+            if zip_code:
+                domain.append(('zip', '=', zip_code))
         else:
             domain += [('name', 'ilike', name)]
             if city:
@@ -268,7 +272,7 @@ class TransactionLogger(models.Model):
         if data.get('ship_info', ''):
             address = data.get('ship_info', '')
             delivery_address = self.find_or_create_address(Customer, address, 'delivery')
-        if Customer.name == "Shopify" or Customer.ca_site_id == 862:
+        if Customer and Customer.name == "Shopify" or Customer.ca_site_id == 862:
             if delivery_address:
                 Customer = delivery_address
         vals = {
@@ -526,5 +530,43 @@ class TransactionLogger(models.Model):
         if self.state == 'new':
             self._reimport()
         return True
+
+    def import_ca_order_manually(self, order_id):
+        connector = self.env['ca.connector'].sudo().search([('state', '=', 'active')], limit=1)
+        if not connector:
+            return False
+
+        cr = self.env.cr
+        SaleOrder = self.env['sale.order'].sudo()
+        sale_order = SaleOrder.search([('chnl_adv_order_id', '=', order_id), ('state', 'not in', ['cancel'])],
+                                      limit=1)
+        if not sale_order:
+            res = connector.call('retrieve_order', order_id=order_id)
+            center_dict = {center.res_id: center.warehouse_id.id for center in
+                           self.env['ca.distribution.center'].search([])}
+            vals = self._get_values(res) or {}
+            try:
+                SaleOrder = self.create_order(vals, center_dict)
+                cr.commit()
+
+                # Creating and Validating Invoice
+                if SaleOrder.invoice_status == 'to invoice':
+                    invoices = SaleOrder._create_invoices(final=True)
+                    invoices.pay_and_reconcile(connector.default_journal_id)
+                    cr.commit()
+            except Exception as e:
+                cr.rollback()
+                error_message = e
+                SaleOrder = False
+                ca_order_id = vals.get('order_no', '')
+                if ca_order_id or error_message:
+                    self.create({
+                        'name': ca_order_id,
+                        'message': error_message,
+                        'state': 'new',
+                    })
+                    cr.commit()
+        else:
+            raise UserError("Order already exist")
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

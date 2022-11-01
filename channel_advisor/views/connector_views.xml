@@ -66,6 +66,11 @@
                             <field name="auto_import_products" />
                             <field name="products_imported_date" string="Last Imported On" />
                         </group>
+                        <group>
+                            <field name="ca_order_id"/>
+                            <button name="import_order_manually" string="Import Single Order"
+                                    type="object" class="fa fa-arrow-right oe_link"/>
+                        </group>
                     </group>
                     <notebook>
                         <page string="Accounts">
