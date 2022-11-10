@@ -273,9 +273,10 @@ class TransactionLogger(models.Model):
         if data.get('ship_info', ''):
             address = data.get('ship_info', '')
             delivery_address = self.find_or_create_address(Customer, address, 'delivery')
-        if Customer and Customer.name == "Shopify" or Customer.ca_site_id == 862:
-            if delivery_address:
-                Customer = delivery_address
+        if Customer :
+            if Customer.name == "Shopify" or Customer.ca_site_id == 862:
+                if delivery_address:
+                    Customer = delivery_address
         vals = {
             'partner_id': Customer.id,
             'is_edi_order': True,
