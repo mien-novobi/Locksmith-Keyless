@@ -6,6 +6,7 @@ from odoo import api, fields, models, _
 import json
 import requests
 from dateutil import parser
+import logging
 
 
 class TransactionLogger(models.Model):
@@ -266,6 +267,8 @@ class TransactionLogger(models.Model):
             else:
                 Customer = self.env['res.partner'].search(
                     [('name', '=ilike', site_name)])
+            logging.error("customer in channeladvisor")
+            logging.error(Customer)
             if not Customer:
                 # Customer = self.env['res.partner'].search(
                 #     [('name', '=ilike', 'Checkout Direct')])
