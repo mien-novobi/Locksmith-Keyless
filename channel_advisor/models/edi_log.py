@@ -256,6 +256,7 @@ class TransactionLogger(models.Model):
         delivery_address = False
         is_review_lst = []
         is_review = False
+        Customer = False
         if data.get('SiteID'):
             site = data.get('SiteID')
             site_name = data.get('SiteName')
