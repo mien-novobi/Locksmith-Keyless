@@ -29,6 +29,9 @@
                 <th name="th_sm_product"><strong>Description</strong></th>
                 <th>Image</th>
                 <th name="th_sm_quantity"><strong>Quantity</strong></th>
+                 <th name="th_barcode">
+                    <strong>Product Barcode</strong>
+                </th>
             </tr>
 
         </xpath>
@@ -50,6 +53,17 @@
                     <span t-field="move.product_uom_qty"/>
                     <span t-field="move.product_uom"/>
                 </td>
+                <td >
+
+                                    <span t-if="move.product_id and move.product_id.barcode">
+                                        <img t-if="len(move.product_id.barcode) == 13" t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s&amp;quiet=%s' % ('EAN13', move.product_id.barcode, 400, 100, 0)" style="height:35px" alt="Barcode"/>
+                                        <img t-elif="len(move.product_id.barcode) == 8" t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s&amp;quiet=%s' % ('EAN8', move.product_id.barcode, 400, 100, 0)" style="height:35px" alt="Barcode"/>
+                                        <img t-else="" t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s&amp;quiet=%s' % ('Code128', move.product_id.barcode, 400, 100, 0)" style="height:35px" alt="Barcode"/>
+
+                                    </span>
+                                    <t t-set="product_barcode" t-value="move.product_id.barcode"/>
+
+                            </td>
             </tr>
 
         </xpath>
@@ -60,6 +74,9 @@
                 <th name="th_sm_product"><strong>Description</strong></th>
                 <th>Image</th>
                 <th name="th_sm_quantity"><strong>Quantity</strong></th>
+                 <th name="th_barcode">
+                    <strong>Product Barcode</strong>
+                </th>
             </tr>
 
         </xpath>
@@ -82,6 +99,17 @@
                     <span t-field="move.product_uom_qty"/>
                     <span t-field="move.product_uom"/>
                 </td>
+                  <td >
+
+                                    <span t-if="move.product_id and move.product_id.barcode">
+                                        <img t-if="len(move.product_id.barcode) == 13" t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s&amp;quiet=%s' % ('EAN13', move.product_id.barcode, 400, 100, 0)" style="height:35px" alt="Barcode"/>
+                                        <img t-elif="len(move.product_id.barcode) == 8" t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s&amp;quiet=%s' % ('EAN8', move.product_id.barcode, 400, 100, 0)" style="height:35px" alt="Barcode"/>
+                                        <img t-else="" t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s&amp;quiet=%s' % ('Code128', move.product_id.barcode, 400, 100, 0)" style="height:35px" alt="Barcode"/>
+
+                                    </span>
+                                    <t t-set="product_barcode" t-value="move.product_id.barcode"/>
+
+                            </td>
             </tr>
         </xpath>
 
