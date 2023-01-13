@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <template id = "stock_report_delivery" inherit_id = "stock.report_delivery_document">
+
         <xpath expr="//t[3]" position="replace">
             <t t-set="partner" t-value="o.partner_id or (o.move_lines and o.move_lines[0].partner_id) or False"/>
             <t t-if="partner" name="partner_header">
@@ -22,6 +23,13 @@
                     #<span t-esc="partner.phone"/>
                 </t>
             </t>
+            <p></p>
+            <div class="row justify-content-end mb16">
+                           <strong>Order#Barcode</strong>
+                                <div class="col-4" name="right_box">
+                                    <img t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s' % ('Code128', o.name, 600, 100)" style="width:300px;height:50px;" alt="Barcode"/>
+                                </div>
+                            </div>
         </xpath>
         <xpath expr="//table[1]/thead/tr[1]" position="replace">
             <tr>
