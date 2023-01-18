@@ -24,12 +24,16 @@
                 </t>
             </t>
             <p></p>
-            <div class="row justify-content-end mb16">
-                           <strong>Order#Barcode</strong>
-                                <div class="col-4" name="right_box">
-                                    <img t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s' % ('Code128', o.name, 600, 100)" style="width:300px;height:50px;" alt="Barcode"/>
-                                </div>
-                            </div>
+
+        </xpath>
+         <xpath expr="//h2" position="inside">
+               <img t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s' % ('Code128', o.name, 600, 100)" style="width:300px;height:50px;" alt="Barcode"/>
+        </xpath>
+       <xpath expr="//div[@name='div_origin']" position="after">
+            <div t-if="o.origin" name="div_origin_bar">
+                 <div><img t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s' % ('Code128', o.origin, 600, 100)" style="width:300px;height:50px;" alt="Barcode"/></div>
+            </div>
+
         </xpath>
         <xpath expr="//table[1]/thead/tr[1]" position="replace">
             <tr>
@@ -109,13 +113,13 @@
                 </td>
                   <td >
 
-                                    <span t-if="move.product_id and move.product_id.barcode">
-                                        <img t-if="len(move.product_id.barcode) == 13" t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s&amp;quiet=%s' % ('EAN13', move.product_id.barcode, 400, 100, 0)" style="height:35px" alt="Barcode"/>
-                                        <img t-elif="len(move.product_id.barcode) == 8" t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s&amp;quiet=%s' % ('EAN8', move.product_id.barcode, 400, 100, 0)" style="height:35px" alt="Barcode"/>
-                                        <img t-else="" t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s&amp;quiet=%s' % ('Code128', move.product_id.barcode, 400, 100, 0)" style="height:35px" alt="Barcode"/>
+                <span t-if="move.product_id and move.product_id.barcode">
+                    <img t-if="len(move.product_id.barcode) == 13" t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s&amp;quiet=%s' % ('EAN13', move.product_id.barcode, 400, 100, 0)" style="height:35px" alt="Barcode"/>
+                    <img t-elif="len(move.product_id.barcode) == 8" t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s&amp;quiet=%s' % ('EAN8', move.product_id.barcode, 400, 100, 0)" style="height:35px" alt="Barcode"/>
+                    <img t-else="" t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s&amp;quiet=%s' % ('Code128', move.product_id.barcode, 400, 100, 0)" style="height:35px" alt="Barcode"/>
 
-                                    </span>
-                                    <t t-set="product_barcode" t-value="move.product_id.barcode"/>
+                </span>
+                <t t-set="product_barcode" t-value="move.product_id.barcode"/>
 
                             </td>
             </tr>
@@ -153,6 +157,12 @@
                     #<span t-esc="o.partner_id.phone"/>
                     <p t-if="o.sudo().partner_id.vat"><t t-esc="o.company_id.country_id.vat_label or 'Tax ID'"/>: <span t-field="o.sudo().partner_id.vat"/></p>
                 </div>
+            </div>
+
+        </xpath>
+         <xpath expr="//div[@name='div_origin']" position="inside">
+            <div t-if="o.origin"  name="div_origin_bar">
+                 <p><img t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s' % ('Code128', o.origin, 600, 100)" style="width:300px;height:50px;" alt="Barcode"/></p>
             </div>
 
         </xpath>
