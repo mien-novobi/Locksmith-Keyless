@@ -27,11 +27,11 @@
 
         </xpath>
          <xpath expr="//h2" position="inside">
-               <img t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s' % ('Code128', o.name, 600, 100)" style="width:300px;height:50px;" alt="Barcode"/>
+               <img t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s&amp;quiet=%s' %('Code128', o.name, 400, 100, 0)" style="height:35px" alt="Barcode"/>
         </xpath>
        <xpath expr="//div[@name='div_origin']" position="after">
             <div t-if="o.origin" name="div_origin_bar">
-                 <div><img t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s' % ('Code128', o.origin, 600, 100)" style="width:300px;height:50px;" alt="Barcode"/></div>
+                 <div><img t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s&amp;quiet=%s' % ('Code128', o.origin, 400, 100, 0)" style="height:35px" alt="Barcode"/></div>
             </div>
 
         </xpath>
